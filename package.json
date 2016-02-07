@@ -1,0 +1,32 @@
+{
+  "name": "postcss-gradient-transparency-fix",
+  "version": "0.0.0",
+  "description": "PostCSS plugin to fix gradient transparency for older browsers",
+  "keywords": [
+    "postcss",
+    "css",
+    "postcss-plugin",
+    "gradient"
+  ],
+  "author": "Gilmore Davidson <gilmoreorless@gmail.com>",
+  "license": "MIT",
+  "repository": "gilmoreorless/postcss-gradient-transparency-fix",
+  "bugs": {
+    "url": "https://github.com/gilmoreorless/postcss-gradient-transparency-fix/issues"
+  },
+  "homepage": "https://github.com/gilmoreorless/postcss-gradient-transparency-fix",
+  "dependencies": {
+    "postcss": "^5.0.14"
+  },
+  "devDependencies": {
+    "ava": "^0.11.0",
+    "eslint": "^1.10.3",
+    "eslint-config-postcss": "^1.0.0"
+  },
+  "scripts": {
+    "test": "ava test.js && eslint *.js"
+  },
+  "eslintConfig": {
+    "extends": "eslint-config-postcss/es5"
+  }
+}
