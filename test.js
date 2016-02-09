@@ -107,6 +107,31 @@ describe('postcss-gradient-transparency-fix', function () {
                      errorString + '#f00 20px, transparent, #0f0', done);
     });
 
+    it('handles multiple transparent values in a single gradient', function (done) {
+        testGradient('#f00, transparent, #0f0, transparent, #00f',
+                     '#f00, rgba(255, 0, 0, 0) 25%, rgba(0, 255, 0, 0) 25%, #0f0, rgba(0, 255, 0, 0) 75%, rgba(0, 0, 255, 0) 75%, #00f', done);
+    });
+
+    it('handles consecutive transparent values', function (done) {
+        testGradient('#f00, transparent, transparent, #0f0',
+                     '#f00, rgba(255, 0, 0, 0) 33%, rgba(0, 255, 0, 0) 67%, #0f0', done);
+        testGradient('#f00, transparent 25%, transparent 73%, #0f0',
+                     '#f00, rgba(255, 0, 0, 0) 25%, rgba(0, 255, 0, 0) 73%, #0f0', done);
+        testGradient('transparent, transparent, #0f0',
+                     'rgba(0, 255, 0, 0) 0%, rgba(0, 255, 0, 0) 50%, #0f0', done);
+    });
+
+    it('handles multiple gradients', function (done) {
+        testGradient('transparent, blue), linear-gradient(red, transparent',
+                     'rgba(0, 0, 255, 0),  blue), linear-gradient(red, rgba(255, 0, 0, 0))', done);
+    });
+
+    it('ignores non-gradient multiple background values', function (done) {
+        testProperty('background', 'linear',
+            'transparent, blue), transparent, url(http://example.com/transparent.png)',
+            'rgba(0, 0, 255, 0), blue), transparent, url(http://example.com/transparent.png)', done);
+    });
+
     it('works with linear-gradient angles', function (done) {
         testGradient('to right, transparent, #ff0',
                      'to right, rgba(255, 255, 0, 0), #ff0', done);
