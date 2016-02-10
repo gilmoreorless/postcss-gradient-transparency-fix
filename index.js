@@ -5,7 +5,7 @@ var colorUtil = require('color');
 var rProp = /(^background|-image)$/;
 var rGradient = /-gradient/;
 var rTransparent = /\btransparent\b/;
-var rGradientParts = /^(\w+-gradient\s*\()(.*)(\)\s*)$/;
+var rHsl = /^hsla?$/;
 
 function hasGradient(str) {
     return rGradient.test(str);
@@ -15,9 +15,19 @@ function hasTransparent(str) {
     return rTransparent.test(str);
 }
 
+function isHsl(str) {
+    return rHsl.test(str);
+}
+
 function getTransparentColour(node) {
     var parsed = colorUtil(valueParser.stringify(node));
-    return parsed.alpha(0).rgbString();
+    parsed.alpha(0);
+    // Try to match the input format as much as possible
+    var fn = 'rgbString';
+    if (node.type === 'function' && isHsl(node.value)) {
+        fn = 'hslString';
+    }
+    return parsed[fn]();
 }
 
 function updateNodeValue(node, colour) {
@@ -36,6 +46,7 @@ function fixGradient(imageNode) {
         if (node.type === 'word' && node.value === 'transparent') {
             nextStop = stopList[i + 1];
             // TODO: Handle stop values
+            // TODO: Handle angle/position prevStop values
             // (red, transparent)
             if (prevStop && !nextStop) {
                 updateNodeValue(node, getTransparentColour(prevStop));
