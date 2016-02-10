@@ -35,7 +35,18 @@ var testGradient = function (input, output, opts, done) {
 describe('postcss-gradient-transparency-fix', function () {
 
     it('ignores non-gradient transparent values', function (done) {
-        test('a{ background:transparent }', 'a{ background:transparent }', done);
+        test('a{ background:transparent }',
+             'a{ background:transparent }', done);
+    });
+
+    it('ignores gradients without transparent values', function (done) {
+        testGradient('red, blue',
+                     'red, blue', done);
+    });
+
+    it('doesn\'t change rgba(r,g,b,0) values', function (done) {
+        testGradient('rgb(255,0,0), rgba(0,0,0,0)',
+                     'rgb(255,0,0), rgba(0,0,0,0)', done);
     });
 
     it('corrects single rgb() value', function (done) {
@@ -93,16 +104,23 @@ describe('postcss-gradient-transparency-fix', function () {
                      '#f00, rgba(255, 0, 0, 0) 50%, rgba(0, 255, 0, 0) 50%, #0f0', done);
     });
 
-    it('calculates missing stop lengths when possible', function (done) {
+    it('calculates missing stop points when possible (no stop points defined)', function (done) {
         testGradient('#f00, transparent, #0f0',
                      '#f00, rgba(255, 0, 0, 0) 50%, rgba(0, 255, 0, 0) 50%, #0f0', done);
+    });
+
+    it('calculates missing stop points when possible (one stop point defined)', function (done) {
         testGradient('#f00 30%, transparent, #0f0',
                      '#f00 30%, rgba(255, 0, 0, 0) 65%, rgba(0, 255, 0, 0) 65%, #0f0', done);
+    });
+
+    it('calculates missing stop points when possible (two stop points defined)', function (done) {
         testGradient('#f00 20px, transparent, #0f0 50px',
                      '#f00 20px, rgba(255, 0, 0, 0) 45px, rgba(0, 255, 0, 0) 45px, #0f0 50px', done);
     });
 
-    it('generates an error when missing stop lengths can\'t be calculated', function (done) {
+    it('generates an error when missing stop points can\'t be calculated', function (done) {
+        // TODO: Make this work with PostCSS's warning system
         testGradient(              '#f00 20px, transparent, #0f0',
                      errorString + '#f00 20px, transparent, #0f0', done);
     });
@@ -112,11 +130,17 @@ describe('postcss-gradient-transparency-fix', function () {
                      '#f00, rgba(255, 0, 0, 0) 25%, rgba(0, 255, 0, 0) 25%, #0f0, rgba(0, 255, 0, 0) 75%, rgba(0, 0, 255, 0) 75%, #00f', done);
     });
 
-    it('handles consecutive transparent values', function (done) {
+    it('handles consecutive transparent values (middle)', function (done) {
         testGradient('#f00, transparent, transparent, #0f0',
                      '#f00, rgba(255, 0, 0, 0) 33%, rgba(0, 255, 0, 0) 67%, #0f0', done);
+    });
+
+    it('handles consecutive transparent values (middle with stop points)', function (done) {
         testGradient('#f00, transparent 25%, transparent 73%, #0f0',
                      '#f00, rgba(255, 0, 0, 0) 25%, rgba(0, 255, 0, 0) 73%, #0f0', done);
+    });
+
+    it('handles consecutive transparent values (start)', function (done) {
         testGradient('transparent, transparent, #0f0',
                      'rgba(0, 255, 0, 0) 0%, rgba(0, 255, 0, 0) 50%, #0f0', done);
     });
@@ -132,23 +156,42 @@ describe('postcss-gradient-transparency-fix', function () {
             'rgba(0, 0, 255, 0), blue), transparent, url(http://example.com/transparent.png)', done);
     });
 
-    it('works with linear-gradient angles', function (done) {
+    it('works with linear-gradient angles (keyword)', function (done) {
         testGradient('to right, transparent, #ff0',
                      'to right, rgba(255, 255, 0, 0), #ff0', done);
+    });
+
+    it('works with linear-gradient angles (unit)', function (done) {
         testGradient('27deg, #ff0, transparent',
                      '27deg, #ff0, rgba(255, 255, 0, 0)', done);
     });
 
-    it('works with radial-gradient syntax', function (done) {
+    it('works with radial-gradient syntax (basic)', function (done) {
         testProperty('background-image', 'radial', 'transparent, #ff0',
-                                         'rgba(255, 255, 0, 0), #ff0', done);
-        testProperty('background-image', 'radial', 'farthest-side at 20% 30%, #ff0, transparent',
-                                         'farthest-side at 20% 30%, #ff0, rgba(255, 255, 0, 0)', done);
+                                                   'rgba(255, 255, 0, 0), #ff0', done);
     });
 
-    it('works with repeating gradients', function (done) {
+    it('works with radial-gradient syntax (keyword)', function (done) {
+        testProperty('background-image', 'radial', 'ellipse, #ff0, transparent',
+                                                   'ellipse, #ff0, rgba(255, 255, 0, 0)', done);
+    });
+
+    it('works with radial-gradient syntax (keyword + position)', function (done) {
+        testProperty('background-image', 'radial', 'farthest-side at 20% 30%, #ff0, transparent',
+                                                   'farthest-side at 20% 30%, #ff0, rgba(255, 255, 0, 0)', done);
+    });
+
+    it('works with radial-gradient syntax (size + position)', function (done) {
+        testProperty('background-image', 'radial', '30px 2em at 20% 30%, #ff0, transparent',
+                                                   '30px 2em at 20% 30%, #ff0, rgba(255, 255, 0, 0)', done);
+    });
+
+    it('works with repeating linear gradients', function (done) {
         testProperty('background-image', 'repeating-linear', 'transparent, #ff0',
                                                              'rgba(255, 255, 0, 0), #ff0', done);
+    });
+
+    it('works with repeating radial gradients', function (done) {
         testProperty('background-image', 'repeating-radial', '#ff0, transparent',
                                                              '#ff0, rgba(255, 255, 0, 0)', done);
     });
@@ -158,11 +201,14 @@ describe('postcss-gradient-transparency-fix', function () {
                                                   'rgba(255, 255, 0, 0), #ff0', done);
     });
 
-    it('works on properties other than background-image', function (done) {
+    it('works on properties other than background-image (background)', function (done) {
         testProperty('background',   'linear', 'transparent, #ff0',
-                                               'rgba(255, 255, 0, 0), #ff0', done);
+                                                'rgba(255, 255, 0, 0), #ff0', done);
+    });
+
+    it('works on properties other than background-image (border-image)', function (done) {
         testProperty('border-image', 'linear', 'transparent, #ff0',
-                                               'rgba(255, 255, 0, 0), #ff0', done);
+                                                'rgba(255, 255, 0, 0), #ff0', done);
     });
 
 });
