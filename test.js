@@ -97,7 +97,7 @@ describe('postcss-gradient-transparency-fix', function () {
 
     it('maintains stop positions', function (done) {
         testGradient('transparent 30%, blue',
-                     'rgba(0, 0, 255, 0) 30%,  blue', done);
+                     'rgba(0, 0, 255, 0) 30%, blue', done);
     });
 
     it('generates two colour stops when transparent is between two colours', function (done) {
