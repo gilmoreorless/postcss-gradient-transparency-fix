@@ -31,9 +31,30 @@ function getTransparentColour(stop) {
     return parsed[fn]();
 }
 
+function cloneStop(stop) {
+    return stop.map(function (node) {
+        // TODO: Make this less hacky
+        return JSON.parse(JSON.stringify(node));
+    });
+}
+
 function updateNodeValue(node, colour) {
     node.type = 'word';
     node.value = colour;
+}
+
+function insertStopNodesAfter(stop, rootNode, afterNode) {
+    var curNode;
+    var i = rootNode.nodes.length;
+    while (i--) {
+        curNode = rootNode.nodes[i];
+        if (curNode === afterNode) {
+            var divNode = {type: 'div', value: ',', before: '', after: ' '};
+            var spaceNode = {type: 'space', value: ' '};
+            rootNode.nodes.splice(i + 1, 0, divNode, stop[0], spaceNode, stop[1]);
+            break;
+        }
+    }
 }
 
 function fixGradient(imageNode) {
@@ -73,7 +94,11 @@ function fixGradient(imageNode) {
                 updateNodeValue(colourNode, getTransparentColour(nextStop));
             // (red, transparent, blue)
             } else if (prevStop && nextStop) {
-                // TODO: Make this work
+                // TODO: Skip this section if prev colour and next colour are the same
+                updateNodeValue(colourNode, getTransparentColour(prevStop));
+                var extraStop = cloneStop(stop);
+                updateNodeValue(extraStop[0], getTransparentColour(nextStop));
+                insertStopNodesAfter(extraStop, imageNode, positionNode);
             }
         }
         prevStop = stop;
