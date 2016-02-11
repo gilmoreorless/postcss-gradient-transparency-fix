@@ -101,8 +101,8 @@ describe('postcss-gradient-transparency-fix', function () {
     });
 
     it('generates two colour stops when transparent is between two colours', function (done) {
-        testGradient('#f00, transparent 50%, #0f0',
-                     '#f00, rgba(255, 0, 0, 0) 50%, rgba(0, 255, 0, 0) 50%, #0f0', done);
+        testGradient('#f00,  transparent 50%, #0f0',
+                     '#f00,  rgba(255, 0, 0, 0) 50%, rgba(0, 255, 0, 0) 50%, #0f0', done);
     });
 
     it('calculates missing stop points when possible (no stop points defined)', function (done) {
