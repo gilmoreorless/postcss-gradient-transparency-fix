@@ -2,6 +2,8 @@
 
 [PostCSS] plugin to fix gradient transparency for older browsers.
 
+**THIS README IS STILL JUST A PLACEHOLDER FOR WORK IN PROGRESS.**
+
 [PostCSS]: https://github.com/postcss/postcss
 [ci-img]:  https://travis-ci.org/gilmoreorless/postcss-gradient-transparency-fix.svg
 [ci]:      https://travis-ci.org/gilmoreorless/postcss-gradient-transparency-fix
