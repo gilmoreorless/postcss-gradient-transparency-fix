@@ -21,6 +21,19 @@ function isHsl(str) {
     return rHsl.test(str);
 }
 
+function getColor(node, logErrors) {
+    var ret;
+    try {
+        ret = colorUtil(valueParser.stringify(node));
+    } catch (e) {
+        ret = false;
+        if (logErrors) {
+            console.warn(e);
+        }
+    }
+    return ret;
+}
+
 
 // ----- DOMAIN OBJECT: COLOR STOP -----
 
@@ -86,7 +99,7 @@ ColorStop.prototype.getTransparentColor = function () {
     if (!node) {
         return 'rgba(0, 0, 0, 0)';
     }
-    var parsed = colorUtil(valueParser.stringify(node));
+    var parsed = getColor(node, true);
     parsed.alpha(0);
     // Try to match the input format as much as possible
     var fn = 'rgbString';
@@ -101,7 +114,7 @@ ColorStop.prototype.getTransparentColor = function () {
 
 function Gradient(parsedNode) {
     this.node = {};
-    this.prelude = [];
+    this.preludeNodes = [];
     this.stops = [];
     this.setNode(parsedNode);
 
@@ -115,21 +128,35 @@ Gradient.prototype.setNode = function (node) {
     if (node.nodes) {
         var curStop = new ColorStop();
         curStop.parent = this;
+        var isPrelude = false;
+        var isFirst = true;
         node.nodes.forEach(function (subNode) {
-            // TODO: Work out which are "prelude" nodes somehow. For now, assume the first node is a colour
             // Dividers (commas) define the end of a stop
             if (subNode.type === 'div') {
-                stopList.push(curStop);
-                curStop = new ColorStop();
-                curStop.parent = this;
-                curStop.beforeNode = subNode;
+                if (!isPrelude) {
+                    stopList.push(curStop);
+                    curStop = new ColorStop();
+                    curStop.parent = this;
+                    curStop.beforeNode = subNode;
+                }
+                isPrelude = false;
+                return;
             }
+            // Work out if the "stop" is actually prelude matter (angle/size definitions)
+            if (isFirst) {
+                isFirst = false;
+                var color = getColor(subNode);
+                if (!color) {
+                    isPrelude = true;
+                }
+            }
+            if (isPrelude) {
+                this.preludeNodes.push(subNode);
             // Spaces are value separators
-            if (subNode.type === 'space') {
+            } else if (subNode.type === 'space') {
                 curStop.separatorNode = subNode;
-            }
             // Function or word is either a colour or a stop position
-            if (subNode.type === 'function' || subNode.type === 'word') {
+            } else if (subNode.type === 'function' || subNode.type === 'word') {
                 if (curStop.colorNode) {
                     curStop.positionNode = subNode;
                 } else {
@@ -179,7 +206,7 @@ Gradient.prototype.syncNodes = function () {
     var stopNodes = this.stops.reduce(function (memo, stop) {
         return memo.concat(stop.nodes());
     }, []);
-    this.node.nodes = [].concat(this.prelude, stopNodes);
+    this.node.nodes = [].concat(this.preludeNodes, stopNodes);
 };
 
 

@@ -153,7 +153,7 @@ describe('postcss-gradient-transparency-fix', function () {
 
     it('handles multiple gradients', function (done) {
         testGradient('transparent, blue), linear-gradient(red, transparent',
-                     'rgba(0, 0, 255, 0),  blue), linear-gradient(red, rgba(255, 0, 0, 0))', done);
+                     'rgba(0, 0, 255, 0), blue), linear-gradient(red, rgba(255, 0, 0, 0)', done);
     });
 
     it('ignores non-gradient multiple background values', function (done) {
@@ -178,8 +178,8 @@ describe('postcss-gradient-transparency-fix', function () {
     });
 
     it('works with radial-gradient syntax (keyword)', function (done) {
-        testProperty('background-image', 'radial', 'ellipse, transparent, #ff0',
-                                                   'ellipse, rgba(255, 255, 0, 0), #ff0', done);
+        testProperty('background-image', 'radial', 'ellipse, #ff0, transparent',
+                                                   'ellipse, #ff0, rgba(255, 255, 0, 0)', done);
     });
 
     it('works with radial-gradient syntax (keyword + position)', function (done) {
