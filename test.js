@@ -110,14 +110,19 @@ describe('postcss-gradient-transparency-fix', function () {
                      '#f00, rgba(255, 0, 0, 0) 50%, rgba(0, 255, 0, 0) 50%, #0f0', done);
     });
 
-    it('calculates missing stop points when possible (one stop point defined)', function (done) {
+    it('calculates missing stop points when possible (one % stop point defined before)', function (done) {
         testGradient('#f00 30%, transparent, #0f0',
                      '#f00 30%, rgba(255, 0, 0, 0) 65%, rgba(0, 255, 0, 0) 65%, #0f0', done);
     });
 
+    it('calculates missing stop points when possible (one % stop point defined after)', function (done) {
+        testGradient('#f00, transparent, #0f0 70%',
+                     '#f00, rgba(255, 0, 0, 0) 35%, rgba(0, 255, 0, 0) 35%, #0f0 70%', done);
+    });
+
     it('calculates missing stop points when possible (two stop points defined)', function (done) {
         testGradient('#f00 20px, transparent, #0f0 50px',
-                     '#f00 20px, rgba(255, 0, 0, 0) 45px, rgba(0, 255, 0, 0) 45px, #0f0 50px', done);
+                     '#f00 20px, rgba(255, 0, 0, 0) 35px, rgba(0, 255, 0, 0) 35px, #0f0 50px', done);
     });
 
     it('generates an error when missing stop points can\'t be calculated', function (done) {

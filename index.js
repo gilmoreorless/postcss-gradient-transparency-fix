@@ -25,6 +25,7 @@ function isHsl(str) {
 // ----- DOMAIN OBJECT: COLOR STOP -----
 
 function ColorStop(nodes) {
+    this.parent = null;
     nodes = nodes || {};
     this.beforeNode    = nodes.beforeNode;
     this.colorNode     = nodes.colorNode;
@@ -42,24 +43,39 @@ ColorStop.prototype.nodes = function () {
 };
 
 ColorStop.prototype.clone = function () {
-    // TODO: Make this less hacky
-    return new ColorStop(JSON.parse(JSON.stringify(this)));
+    var nodes = {};
+    ['before', 'color', 'separator', 'position'].forEach(function (prop) {
+        var key = prop + 'Node';
+        if (this[key]) {
+            nodes[key] = JSON.parse(JSON.stringify(this[key]));
+        }
+    }, this);
+    return new ColorStop(nodes);
 };
 
 ColorStop.prototype.setColor = function (colorString) {
     if (!this.colorNode) {
         this.colorNode = {};
+        if (this.parent) {
+            this.parent.syncNodes();
+        }
     }
     this.colorNode.type = 'word';
     this.colorNode.value = colorString;
 };
 
 ColorStop.prototype.setPosition = function (positionString) {
+    var isDirty = false;
     if (!this.separatorNode) {
         this.separatorNode = { type: 'space', value: ' ' };
+        isDirty = true;
     }
     if (!this.positionNode) {
         this.positionNode = {};
+        isDirty = true;
+    }
+    if (isDirty && this.parent) {
+        this.parent.syncNodes();
     }
     this.positionNode.type = 'word';
     this.positionNode.value = positionString;
@@ -98,12 +114,14 @@ Gradient.prototype.setNode = function (node) {
     var stopList = this.stops = [];
     if (node.nodes) {
         var curStop = new ColorStop();
+        curStop.parent = this;
         node.nodes.forEach(function (subNode) {
             // TODO: Work out which are "prelude" nodes somehow. For now, assume the first node is a colour
             // Dividers (commas) define the end of a stop
             if (subNode.type === 'div') {
                 stopList.push(curStop);
                 curStop = new ColorStop();
+                curStop.parent = this;
                 curStop.beforeNode = subNode;
             }
             // Spaces are value separators
@@ -118,7 +136,7 @@ Gradient.prototype.setNode = function (node) {
                     curStop.colorNode = subNode;
                 }
             }
-        });
+        }, this);
         if (curStop.colorNode) {
             stopList.push(curStop);
         }
@@ -134,6 +152,7 @@ Gradient.prototype.walkStops = function (fn) {
             action.call(this);
         }, this);
         this._actionQueue = [];
+        this.syncNodes();
     }
 };
 
@@ -148,18 +167,6 @@ Gradient.prototype.insertStopAfter = function (newStop, afterStop) {
             stopIndex = this.stops.length - 1;
         }
         this.stops.splice(stopIndex + 1, 0, newStop);
-
-        // Add stop's nodes to overall node list
-        var referenceNode = afterStop.nodes().slice(-1)[0];
-        if (!referenceNode) {
-            return;
-        }
-        var nodeList = this.node.nodes;
-        var nodeIndex = nodeList.indexOf(referenceNode);
-        if (nodeIndex === -1) {
-            nodeIndex = nodeList.length - 1;
-        }
-        nodeList.splice.apply(nodeList, [nodeIndex + 1, 0].concat(newStop.nodes()));
     };
     if (this._walking) {
         this._actionQueue.push(action);
@@ -168,8 +175,62 @@ Gradient.prototype.insertStopAfter = function (newStop, afterStop) {
     }
 };
 
+Gradient.prototype.syncNodes = function () {
+    var stopNodes = this.stops.reduce(function (memo, stop) {
+        return memo.concat(stop.nodes());
+    }, []);
+    this.node.nodes = [].concat(this.prelude, stopNodes);
+};
+
 
 // ----- MAIN ACTIONS -----
+
+function unitValue(node) {
+    return node ? valueParser.unit(node.value) : false;
+}
+
+function midPoint(val1, val2) {
+    var num1 = +val1 || 0;
+    var num2 = +val2 || 0;
+    return num1 + (num2 - num1) / 2;
+}
+
+/**
+ * Try to calculate a new stop position exactly halfway between two other stops.
+ */
+function calculateStopPosition(stop1, stop2) {
+    var pos1 = unitValue(stop1.positionNode);
+    var pos2 = unitValue(stop2.positionNode);
+
+    // No positions defined, default to 50%
+    // TODO: Make this smarter
+    // TODO: Test calc() values
+    if (!pos1 && !pos2) {
+        return '50%';
+    }
+    // Both positions defined
+    if (pos1 && pos2) {
+        // Both using the same unit
+        if (pos1.unit === pos2.unit) {
+            return midPoint(pos1.number, pos2.number) + pos1.unit;
+        // Different units
+        } else {
+            // TODO: Do some sort of error
+            return '/* ERROR */';
+        }
+    }
+    // Only one position defined
+    var startPerc = 0, endPerc = 100;
+    if (pos1 && pos1.unit === '%' || pos2 && pos2.unit === '%') {
+        if (pos1) {
+            startPerc = +pos1.number || 0;
+        }
+        if (pos2) {
+            endPerc = +pos2.number || 0;
+        }
+        return midPoint(startPerc, endPerc) + '%';
+    }
+}
 
 function fixGradient(imageNode) {
     var gradient = new Gradient(imageNode);
@@ -192,6 +253,15 @@ function fixGradient(imageNode) {
                 var extraStop = stop.clone();
                 stop.setColor(prevStop.getTransparentColor());
                 extraStop.setColor(nextStop.getTransparentColor());
+                // Make sure the stop positions are the same for both transparent stops
+                if (!stop.positionNode) {
+                    var position = calculateStopPosition(prevStop, nextStop);
+                    if (position) {
+                        // TODO: Error checking
+                        stop.setPosition(position);
+                        extraStop.setPosition(position);
+                    }
+                }
                 gradient.insertStopAfter(extraStop, stop);
             }
         }
