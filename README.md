@@ -13,13 +13,13 @@ Finds all instances of the `transparent` keyword being used in CSS gradients and
 
 Back when the [CSS gradients] specification was first written, it defined colour transitions as simple interpolations in the RGB colour space. A lot of web developers started being caught out by gradients that faded to full transparency, and noticed dark greys in their gradients.
 
-![Gradient using old spec](img/example-non-premul.svg)
+![Gradient using old spec][img-non-premul]
 
 The reason for the darkness is that the CSS keyword `transparent` is actually an alias for `rgba(0, 0, 0, 0)` — that is, fully transparent _black_. A simple definition like `linear-gradient(red, transparent)` would not only fade the colour from fully opaque to fully transparent, but it would _also_ fade from red to black at the same time.
 
 While this was correct from a technical view, it was unintuitive behaviour to web developers. Eventually the spec was changed to codify the use of a special graphics technique called _[pre-multiplied alpha][premul]_. While the specifics of this technique are not important here, the results are. Effectively it means that gradients fading to/from a fully transparent colour now eliminate the “fade to black” part, and look much more like developers expect them to.
 
-![Gradient using new spec](img/example-premul.svg)
+![Gradient using new spec][img-premul]
 
 Of course, there’s a catch — not all the browsers have implemented the updated version of the spec. If you write a gradient with a `transparent` value, it will look the way you intended in some browsers but not in others.
 
@@ -138,6 +138,8 @@ Examples of positions that cannot be calculated at all:
 [PostCSS]: https://github.com/postcss/postcss
 [ci-img]:  https://travis-ci.org/gilmoreorless/postcss-gradient-transparency-fix.svg
 [ci]:      https://travis-ci.org/gilmoreorless/postcss-gradient-transparency-fix
+[img-non-premul]: https://rawgit.com/gilmoreorless/postcss-gradient-transparency-fix/master/img/example-non-premul.svg
+[img-premul]:     https://rawgit.com/gilmoreorless/postcss-gradient-transparency-fix/master/img/example-premul.svg
 [CSS gradients]:  https://www.w3.org/TR/css3-images/
 [premul]:         https://www.w3.org/TR/2012/CR-css3-images-20120417/#color-stop-syntax
 [linear-brosset]: https://medium.com/@patrickbrosset/do-you-really-understand-css-linear-gradients-631d9a895caf
