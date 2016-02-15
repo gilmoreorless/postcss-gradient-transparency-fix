@@ -13,13 +13,13 @@ Finds all instances of the `transparent` keyword being used in CSS gradients and
 
 Back when the [CSS gradients] specification was first written, it defined colour transitions as simple interpolations in the RGB colour space. A lot of web developers started being caught out by gradients that faded to full transparency, and noticed dark greys in their gradients.
 
-< EXAMPLE IMAGE TBC >
+![Gradient using old spec](img/example-non-premul.svg)
 
 The reason for the darkness is that the CSS keyword `transparent` is actually an alias for `rgba(0, 0, 0, 0)` — that is, fully transparent _black_. A simple definition like `linear-gradient(red, transparent)` would not only fade the colour from fully opaque to fully transparent, but it would _also_ fade from red to black at the same time.
 
 While this was correct from a technical view, it was unintuitive behaviour to web developers. Eventually the spec was changed to codify the use of a special graphics technique called _[pre-multiplied alpha][premul]_. While the specifics of this technique are not important here, the results are. Effectively it means that gradients fading to/from a fully transparent colour now eliminate the “fade to black” part, and look much more like developers expect them to.
 
-< EXAMPLE IMAGE TBC >
+![Gradient using new spec](img/example-premul.svg)
 
 Of course, there’s a catch — not all the browsers have implemented the updated version of the spec. If you write a gradient with a `transparent` value, it will look the way you intended in some browsers but not in others.
 
