@@ -1,12 +1,13 @@
 {
   "name": "postcss-gradient-transparency-fix",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "PostCSS plugin to fix gradient transparency for older browsers",
   "keywords": [
     "postcss",
     "css",
     "postcss-plugin",
-    "gradient"
+    "gradient",
+    "transparent"
   ],
   "author": "Gilmore Davidson <gilmoreorless@gmail.com>",
   "license": "MIT",
