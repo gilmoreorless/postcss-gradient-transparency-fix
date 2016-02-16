@@ -3,32 +3,37 @@ var expect  = require('chai').expect;
 
 var plugin = require('./');
 
-var errorString = '/* ERROR: Unable to calculate transparency stop lengths. Please use explicit stop values. */\n';
-
-var test = function (input, output, opts, done) {
-    if (typeof opts === 'function' && done === undefined) {
-        done = opts;
-        opts = {};
+var test = function (input, output, warnings, done) {
+    if (typeof warnings === 'function' && done === undefined) {
+        done = warnings;
+        warnings = 0;
     }
-    postcss([ plugin(opts) ]).process(input).then(function (result) {
+    postcss([ plugin() ]).process(input).then(function (result) {
         expect(result.css).to.eql(output);
-        expect(result.warnings()).to.be.empty;
+        if (warnings) {
+            expect(result.warnings().length).to.equal(warnings.length);
+            result.warnings().forEach(function (warning, i) {
+                expect(warning.text).to.equal(warnings[i]);
+            });
+        } else {
+            expect(result.warnings()).to.be.empty;
+        }
         done();
     }).catch(function (error) {
         done(error);
     });
 };
 
-var testProperty = function (prop, gradType, input, output, opts, done) {
+var testProperty = function (prop, gradType, input, output, warnings, done) {
     var prefix = '.test{ ' + prop + ':' + gradType + '-gradient( ';
     var suffix = ' ); }';
     input = prefix + input + suffix;
     output = prefix + output + suffix;
-    return test(input, output, opts, done);
+    return test(input, output, warnings, done);
 };
 
-var testGradient = function (input, output, opts, done) {
-    return testProperty('background-image', 'linear', input, output, opts, done);
+var testGradient = function (input, output, warnings, done) {
+    return testProperty('background-image', 'linear', input, output, warnings, done);
 };
 
 /* global describe, it */
@@ -79,7 +84,7 @@ describe('postcss-gradient-transparency-fix', function () {
                      '#5adCab,rgba(90, 220, 171, 0)', done);
     });
 
-    // TODO: Submit fix to color-string module to get this working
+    // TODO: Submit fix to color-string module to get this working (#3)
     // it('corrects 8-digit hex value', function (done) {
     //     testGradient('#fee1600d, transparent',
     //                  '#fee1600d, rgba(254, 225, 96, 0)', done);
@@ -125,11 +130,15 @@ describe('postcss-gradient-transparency-fix', function () {
                      '#f00 20px, rgba(255, 0, 0, 0) 35px, rgba(0, 255, 0, 0) 35px, #0f0 50px', done);
     });
 
-    // it('generates an error when missing stop points can\'t be calculated', function (done) {
-    //     // TODO: Make this work with PostCSS's warning system
-    //     testGradient(              '#f00 20px, transparent, #0f0',
-    //                  errorString + '#f00 20px, transparent, #0f0', done);
-    // });
+    it('generates a warning when missing stop points can\'t be calculated (missing non-% unit)', function (done) {
+        var input = '#f00 20px, transparent, #0f0';
+        testGradient(input, input, [plugin.ERROR_STOP_POSITION], done);
+    });
+
+    it('generates a warning when missing stop points can\'t be calculated (mixed units)', function (done) {
+        var input = '#f00 10%, transparent, #0f0 20em';
+        testGradient(input, input, [plugin.ERROR_STOP_POSITION], done);
+    });
 
     // it('handles multiple transparent values in a single gradient', function (done) {
     //     testGradient('#f00, transparent, #0f0, transparent, #00f',

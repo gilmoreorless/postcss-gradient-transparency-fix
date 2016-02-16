@@ -7,6 +7,8 @@ var rGradient = /-gradient/;
 var rTransparent = /\btransparent\b/;
 var rHsl = /^hsla?$/;
 
+var errorString = 'Cannot calculate a stop position for `transparent` value. Please use explicit stop positions.';
+
 // ----- UTILITY FUNCTIONS -----
 
 function hasGradient(str) {
@@ -229,21 +231,27 @@ function calculateStopPosition(stop1, stop2) {
     var pos1 = unitValue(stop1.positionNode);
     var pos2 = unitValue(stop2.positionNode);
 
+    var good = function (value) {
+        return {value: value};
+    };
+    var bad = function (warning) {
+        return {value: false, warning: warning};
+    };
+
     // No positions defined, default to 50%
     // TODO: Make this smarter
     // TODO: Test calc() values
     if (!pos1 && !pos2) {
-        return '50%';
+        return good('50%');
     }
     // Both positions defined
     if (pos1 && pos2) {
         // Both using the same unit
         if (pos1.unit === pos2.unit) {
-            return midPoint(pos1.number, pos2.number) + pos1.unit;
+            return good(midPoint(pos1.number, pos2.number) + pos1.unit);
         // Different units
         } else {
-            // TODO: Do some sort of error
-            return '/* ERROR */';
+            return bad(errorString);
         }
     }
     // Only one position defined
@@ -255,11 +263,13 @@ function calculateStopPosition(stop1, stop2) {
         if (pos2) {
             endPerc = +pos2.number || 0;
         }
-        return midPoint(startPerc, endPerc) + '%';
+        return good(midPoint(startPerc, endPerc) + '%');
     }
+    // No value could be calculated
+    return bad(errorString);
 }
 
-function fixGradient(imageNode) {
+function fixGradient(imageNode, warnings) {
     var gradient = new Gradient(imageNode);
     // console.log(gradient.stops)
 
@@ -268,6 +278,7 @@ function fixGradient(imageNode) {
         if (stop.colorNode.type === 'word' && stop.colorNode.value === 'transparent') {
             var prevStop = gradient.stops[i - 1];
             var nextStop = gradient.stops[i + 1];
+            var position;
             // (red, transparent)
             if (prevStop && !nextStop) {
                 stop.setColor(prevStop.getTransparentColor());
@@ -276,20 +287,24 @@ function fixGradient(imageNode) {
                 stop.setColor(nextStop.getTransparentColor());
             // (red, transparent, blue)
             } else if (prevStop && nextStop) {
-                // TODO: Skip this section if prev colour and next colour are the same
+                // TODO: Skip this section if prev colour and next colour are the same (#2)
+                // Check if the position can be calculated
+                if (!stop.positionNode) {
+                    position = calculateStopPosition(prevStop, nextStop);
+                    if (position.warning) {
+                        warnings.push(position.warning);
+                        return;
+                    }
+                }
                 var extraStop = stop.clone();
                 stop.setColor(prevStop.getTransparentColor());
                 extraStop.setColor(nextStop.getTransparentColor());
-                // Make sure the stop positions are the same for both transparent stops
-                if (!stop.positionNode) {
-                    var position = calculateStopPosition(prevStop, nextStop);
-                    if (position) {
-                        // TODO: Error checking
-                        stop.setPosition(position);
-                        extraStop.setPosition(position);
-                    }
-                }
                 gradient.insertStopAfter(extraStop, stop);
+                // Make sure the stop positions are the same for both transparent stops
+                if (position && position.value) {
+                    stop.setPosition(position.value);
+                    extraStop.setPosition(position.value);
+                }
             }
         }
     });
@@ -297,25 +312,33 @@ function fixGradient(imageNode) {
 
 function fixAllGradients(value) {
     var parsed = valueParser(value);
+    var warnings = [];
     parsed.walk(function (node) {
         if (node.type === 'function' && hasGradient(node.value)) {
-            fixGradient(node);
+            fixGradient(node, warnings);
             return false;
         }
     });
-    return parsed.toString();
+    return {
+        value: parsed.toString(),
+        warnings: warnings
+    };
 }
 
 module.exports = postcss.plugin('postcss-gradient-transparency-fix', function (opts) {
     opts = opts || {};
 
     return function (css, result) {
-        css.walkRules(function (rule) {
-            rule.walkDecls(rProp, function (decl) {
-                if (hasGradient(decl.value) && hasTransparent(decl.value)) {
-                    decl.value = fixAllGradients(decl.value);
-                }
-            });
+        css.walkDecls(rProp, function (decl) {
+            if (hasGradient(decl.value) && hasTransparent(decl.value)) {
+                var fixedValue = fixAllGradients(decl.value);
+                decl.value = fixedValue.value;
+                fixedValue.warnings.forEach(function (warning) {
+                    decl.warn(result, warning);
+                });
+            }
         });
     };
 });
+
+module.exports.ERROR_STOP_POSITION = errorString;

@@ -23,9 +23,10 @@ While this was correct from a technical view, it was unintuitive behaviour to we
 
 Of course, there’s a catch — not all the browsers have implemented the updated version of the spec. If you write a gradient with a `transparent` value, it will look the way you intended in some browsers but not in others.
 
-At the current time (February 2016), the following browsers do **not** support the updated spec:
+At the current time (February 2016), the following browsers support CSS gradients but do **not** support the updated spec:
 
-* _TBC, probably only Safari_
+* Desktop Safari
+* iOS Safari
 
 The solution for those browsers is to not use the `transparent` keyword at all, but instead use specific `rgba()` or `hsla()` values that have full transparency but keep the colour the same:
 
