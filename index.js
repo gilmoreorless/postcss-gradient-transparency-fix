@@ -23,6 +23,10 @@ function isHsl(str) {
     return rHsl.test(str);
 }
 
+function isCalc(node) {
+    return node && node.type === 'function' && node.value === 'calc';
+}
+
 function getColor(node, logErrors) {
     var ret;
     try {
@@ -238,9 +242,12 @@ function calculateStopPosition(stop1, stop2) {
         return {value: false, warning: warning};
     };
 
+    // Exit early if either value is calc()
+    if (isCalc(stop1.positionNode) || isCalc(stop1.positionNode)) {
+        return bad(errorString);
+    }
     // No positions defined, default to 50%
-    // TODO: Make this smarter
-    // TODO: Test calc() values
+    // TODO: Make this smarter (#1)
     if (!pos1 && !pos2) {
         return good('50%');
     }

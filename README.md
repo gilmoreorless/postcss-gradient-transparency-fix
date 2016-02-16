@@ -133,6 +133,9 @@ Examples of positions that cannot be calculated at all:
 
 /* Surrounding stops have different unit types */
 (red 100px, transparent, green 80%)
+
+/* Surrounding stops use calc() */
+(red 1em, transparent, green calc(100% - 1em))
 ```
 
 

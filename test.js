@@ -100,9 +100,14 @@ describe('postcss-gradient-transparency-fix', function () {
                      'rgba(0, 0, 255, 0),  blue', done);
     });
 
-    it('maintains stop positions', function (done) {
+    it('maintains stop positions (basic)', function (done) {
         testGradient('transparent 30%, blue',
                      'rgba(0, 0, 255, 0) 30%, blue', done);
+    });
+
+    it('maintains stop positions (calc)', function (done) {
+        testGradient('transparent calc(30% + 2px), blue',
+                     'rgba(0, 0, 255, 0) calc(30% + 2px), blue', done);
     });
 
     it('generates two colour stops when transparent is between two colours', function (done) {
@@ -137,6 +142,11 @@ describe('postcss-gradient-transparency-fix', function () {
 
     it('generates a warning when missing stop points can\'t be calculated (mixed units)', function (done) {
         var input = '#f00 10%, transparent, #0f0 20em';
+        testGradient(input, input, [plugin.ERROR_STOP_POSITION], done);
+    });
+
+    it('generates a warning when missing stop points can\'t be calculated (calc units)', function (done) {
+        var input = '#f00 calc(10% + 1em), transparent, #0f0 calc(90% - 1em)';
         testGradient(input, input, [plugin.ERROR_STOP_POSITION], done);
     });
 
