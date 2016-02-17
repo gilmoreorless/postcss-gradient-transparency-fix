@@ -1,6 +1,7 @@
 {
     "rules": {
         "max-len": [1, 120],
+        "no-extra-parens": [0],
         "prefer-spread": [0]
     }
 }

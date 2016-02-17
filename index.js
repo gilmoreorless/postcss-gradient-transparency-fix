@@ -40,6 +40,31 @@ function getColor(node, logErrors) {
     return ret;
 }
 
+function unitValue(node) {
+    return node ? valueParser.unit(node.value) : false;
+}
+
+function midPoint(val1, val2) {
+    var num1 = +val1 || 0;
+    var num2 = +val2 || 0;
+    return num1 + (num2 - num1) / 2;
+}
+
+/**
+ * Generate a range of evenly-spaced numbers between start and end values (inclusive)
+ */
+function midRange(start, end, count) {
+    count = Math.max(+count || 0, 2); // Force a number greater than 1 (must have at least start/end values)
+    count -= 1; // Makes the maths easier
+    var diff = end - start;
+    var incr = diff / count;
+    var ret = [];
+    for (var i = 0; i <= count; i++) {
+        ret.push(start + incr * i);
+    }
+    return ret;
+}
+
 
 // ----- DOMAIN OBJECT: COLOR STOP -----
 
@@ -50,6 +75,7 @@ function ColorStop(nodes) {
     this.colorNode     = nodes.colorNode;
     this.separatorNode = nodes.separatorNode;
     this.positionNode  = nodes.positionNode;
+    this.parsePosition();
 }
 
 ColorStop.prototype.nodes = function () {
@@ -83,7 +109,10 @@ ColorStop.prototype.setColor = function (colorString) {
     this.colorNode.value = colorString;
 };
 
-ColorStop.prototype.setPosition = function (positionString) {
+ColorStop.prototype.setPosition = function (positionString, unit) {
+    if (unit !== undefined) {
+        positionString = '' + positionString + unit;
+    }
     var isDirty = false;
     if (!this.separatorNode) {
         this.separatorNode = { type: 'space', value: ' ' };
@@ -98,6 +127,18 @@ ColorStop.prototype.setPosition = function (positionString) {
     }
     this.positionNode.type = 'word';
     this.positionNode.value = positionString;
+    this.parsePosition();
+};
+
+ColorStop.prototype.parsePosition = function () {
+    var parsed = unitValue(this.positionNode);
+    if (parsed) {
+        this.positionNumber = +parsed.number || 0;
+        this.positionUnit = parsed.unit;
+    } else {
+        this.positionNumber = undefined;
+        this.positionUnit = isCalc(this.positionNode) ? 'calc' : undefined;
+    }
 };
 
 ColorStop.prototype.getTransparentColor = function () {
@@ -165,6 +206,7 @@ Gradient.prototype.setNode = function (node) {
             } else if (subNode.type === 'function' || subNode.type === 'word') {
                 if (curStop.colorNode) {
                     curStop.positionNode = subNode;
+                    curStop.parsePosition();
                 } else {
                     curStop.colorNode = subNode;
                 }
@@ -218,74 +260,84 @@ Gradient.prototype.syncNodes = function () {
 
 // ----- MAIN ACTIONS -----
 
-function unitValue(node) {
-    return node ? valueParser.unit(node.value) : false;
-}
-
-function midPoint(val1, val2) {
-    var num1 = +val1 || 0;
-    var num2 = +val2 || 0;
-    return num1 + (num2 - num1) / 2;
-}
-
 /**
  * Try to calculate a new stop position exactly halfway between two other stops.
  */
-function calculateStopPosition(stop1, stop2) {
-    var pos1 = unitValue(stop1.positionNode);
-    var pos2 = unitValue(stop2.positionNode);
-
-    var good = function (value) {
-        return {value: value};
+function calculateStopPositions(stop1, stop2, count) {
+    var good = function (values, unit) {
+        return { values: values, unit: unit };
     };
     var bad = function (warning) {
-        return {value: false, warning: warning};
+        return { values: false, unit: '', warning: warning };
     };
 
     // Exit early if either value is calc()
-    if (isCalc(stop1.positionNode) || isCalc(stop1.positionNode)) {
+    if (stop1 && isCalc(stop1.positionNode) || stop2 && isCalc(stop2.positionNode)) {
         return bad(errorString);
     }
-    // No positions defined, default to 50%
-    // TODO: Make this smarter (#1)
-    if (!pos1 && !pos2) {
-        return good('50%');
+
+    var pos1 = stop1 ? unitValue(stop1.positionNode) : { number: '0', unit: '%' };
+    var pos2 = stop2 ? unitValue(stop2.positionNode) : { number: '100', unit: '%' };
+    var startPos, endPos, baseUnit;
+
+    // Check if missing stops can be calculated
+    if (pos1.unit !== pos2.unit) {
+        return bad(errorString);
     }
-    // Both positions defined
-    if (pos1 && pos2) {
-        // Both using the same unit
-        if (pos1.unit === pos2.unit) {
-            return good(midPoint(pos1.number, pos2.number) + pos1.unit);
-        // Different units
-        } else {
-            return bad(errorString);
+    startPos = +pos1.number || 0;
+    endPos = +pos2.number || 0;
+    baseUnit = pos1.unit;
+
+    // Generate as many missing positions as required
+    var positions = midRange(startPos, endPos, count);
+    return good(positions, baseUnit);
+}
+
+function assignStopPositions(gradient, warnings) {
+    var stops = gradient.stops;
+    var stop, beforeStop, midStops, afterStop, si, checkStop, positions;
+    for (var i = 0, ii = stops.length; i < ii; i++) {
+        stop = stops[i];
+        if (stop.positionNumber === undefined) {
+            beforeStop = stops[i - 1];
+            midStops = [stop];
+            for (si = i + 1; si < ii; si++) {
+                checkStop = stops[si];
+                if (checkStop.positionNumber === undefined) {
+                    midStops.push(checkStop);
+                } else {
+                    afterStop = checkStop;
+                    break;
+                }
+            }
+            // Check for missing values
+            positions = calculateStopPositions(beforeStop, afterStop, midStops.length);
+            console.log(positions);
+            if (positions.warning) {
+                warnings.push(positions.warning);
+                i += midStops.length;
+            } else {
+                positions.values && positions.values.forEach(function (value, vi) {
+                    midStops[vi].positionNumber = value;
+                    midStops[vi].positionUnit = positions.unit;
+                });
+            }
         }
     }
-    // Only one position defined
-    var startPerc = 0, endPerc = 100;
-    if (pos1 && pos1.unit === '%' || pos2 && pos2.unit === '%') {
-        if (pos1) {
-            startPerc = +pos1.number || 0;
-        }
-        if (pos2) {
-            endPerc = +pos2.number || 0;
-        }
-        return good(midPoint(startPerc, endPerc) + '%');
-    }
-    // No value could be calculated
-    return bad(errorString);
 }
 
 function fixGradient(imageNode, warnings) {
     var gradient = new Gradient(imageNode);
+
+    // Run through each stop and pre-calculate any missing stop positions (where possible)
+    assignStopPositions(gradient);
     // console.log(gradient.stops)
 
-    // Run through each stop and fix transparent values
+    // Fix transparent values
     gradient.walkStops(function (stop, i) {
         if (stop.colorNode.type === 'word' && stop.colorNode.value === 'transparent') {
             var prevStop = gradient.stops[i - 1];
             var nextStop = gradient.stops[i + 1];
-            var position;
             // (red, transparent)
             if (prevStop && !nextStop) {
                 stop.setColor(prevStop.getTransparentColor());
@@ -295,23 +347,19 @@ function fixGradient(imageNode, warnings) {
             // (red, transparent, blue)
             } else if (prevStop && nextStop) {
                 // TODO: Skip this section if prev colour and next colour are the same (#2)
-                // Check if the position can be calculated
                 if (!stop.positionNode) {
-                    position = calculateStopPosition(prevStop, nextStop);
-                    if (position.warning) {
-                        warnings.push(position.warning);
+                    // Position number/unit should have been pre-calculated.
+                    // If it's missing, the position can't be worked out, so nothing more can be done for this stop.
+                    if (!stop.positionUnit) {
                         return;
                     }
+                    stop.setPosition(stop.positionNumber, stop.positionUnit);
                 }
+                // Create an extra stop at the same position
                 var extraStop = stop.clone();
                 stop.setColor(prevStop.getTransparentColor());
                 extraStop.setColor(nextStop.getTransparentColor());
                 gradient.insertStopAfter(extraStop, stop);
-                // Make sure the stop positions are the same for both transparent stops
-                if (position && position.value) {
-                    stop.setPosition(position.value);
-                    extraStop.setPosition(position.value);
-                }
             }
         }
     });
