@@ -27,6 +27,7 @@ At the current time (February 2016), the following browsers support CSS gradient
 
 * Desktop Safari
 * iOS Safari
+* ...yup, that’s it (I honestly expected this list to be bigger)
 
 The solution for those browsers is to not use the `transparent` keyword at all, but instead use specific `rgba()` or `hsla()` values that have full transparency but keep the colour the same:
 
@@ -38,7 +39,7 @@ The solution for those browsers is to not use the `transparent` keyword at all, 
 
 /* Compatible version */
 .thingy {
-    background-image: linear-gradient(green, rgba(0, 255, 0, 0));
+    background-image: linear-gradient(green, rgba(0, 128, 0, 0));
 }
 ```
 
@@ -52,7 +53,7 @@ If you have colours either side of a `transparent` keyword, you need to create _
 
 /* Compatible version */
 .thingy {
-    background-image: linear-gradient(green, rgba(0, 255, 0, 0) 50%,
+    background-image: linear-gradient(green, rgba(0, 128, 0, 0) 50%,
                                              rgba(0, 0, 255, 0) 50%, blue);
 }
 ```
@@ -96,11 +97,16 @@ Output:
 
 ## Usage
 
+Install the plugin via [npm](npm): `npm install postcss-gradient-transparency-fix`
+
+Then include it in your project in the same way as other PostCSS plugins. For example:
+
 ```js
 postcss([ require('postcss-gradient-transparency-fix') ])
 ```
 
-See [PostCSS] docs for examples for your environment.
+See the [PostCSS] docs for examples for your environment.
+
 
 ## Caveats, warnings, etc.
 
@@ -142,6 +148,7 @@ Examples of positions that cannot be calculated at all:
 [PostCSS]: https://github.com/postcss/postcss
 [ci-img]:  https://travis-ci.org/gilmoreorless/postcss-gradient-transparency-fix.svg
 [ci]:      https://travis-ci.org/gilmoreorless/postcss-gradient-transparency-fix
+[npm]:     https://www.npmjs.com/package/postcss-gradient-transparency-fix
 [img-non-premul]: https://rawgit.com/gilmoreorless/postcss-gradient-transparency-fix/master/img/example-non-premul.svg
 [img-premul]:     https://rawgit.com/gilmoreorless/postcss-gradient-transparency-fix/master/img/example-premul.svg
 [CSS gradients]:  https://www.w3.org/TR/css3-images/
