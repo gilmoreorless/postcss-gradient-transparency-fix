@@ -115,34 +115,54 @@ describe('postcss-gradient-transparency-fix', function () {
                      '#f00,  rgba(255, 0, 0, 0) 50%, rgba(0, 255, 0, 0) 50%, #0f0', done);
     });
 
-    it('calculates missing stop points when possible (no stop points defined)', function (done) {
+    it('keeps a single colour stop when transparent is between two identical colours (same format)', function (done) {
+        testGradient('#00f, transparent 50%, #00f',
+                     '#00f, rgba(0, 0, 255, 0) 50%, #00f', done);
+    });
+
+    it('keeps a single colour stop when transparent is between two identical colours (different formats)', function (done) {
+        testGradient('rgb(0, 0, 255), transparent 50%, hsl(240, 100%, 50%)',
+                     'rgb(0, 0, 255), rgba(0, 0, 255, 0) 50%, hsl(240, 100%, 50%)', done);
+    });
+
+    it('keeps a single colour stop when transparent is between two colours that are the same, with different alpha', function (done) {
+        testGradient('rgb(0, 0, 255), transparent 50%, rgba(0, 0, 255, 0.9)',
+                     'rgb(0, 0, 255), rgba(0, 0, 255, 0) 50%, rgba(0, 0, 255, 0.9)', done);
+    });
+
+    it('calculates missing stop positions when possible (no stop positions defined)', function (done) {
         testGradient('#f00, transparent, #0f0',
                      '#f00, rgba(255, 0, 0, 0) 50%, rgba(0, 255, 0, 0) 50%, #0f0', done);
     });
 
-    it('calculates missing stop points when possible (one % stop point defined before, one undefined after)', function (done) {
+    it('calculates missing stop positions when possible (one % stop position defined before, one undefined after)', function (done) {
         testGradient('#f00 30%, transparent, #0f0',
                      '#f00 30%, rgba(255, 0, 0, 0) 65%, rgba(0, 255, 0, 0) 65%, #0f0', done);
     });
 
-    it('calculates missing stop points when possible (one % stop point defined before, two undefined after)', function (done) {
+    it('calculates missing stop positions when possible (one % stop position defined before, two undefined after)', function (done) {
         testGradient('#f00 30%, transparent, #0f0, #00f',
                      '#f00 30%, rgba(255, 0, 0, 0) 53.33%, rgba(0, 255, 0, 0) 53.33%, #0f0, #00f', done);
     });
 
-    it('calculates missing stop points when possible (one % stop point defined after, one undefined before)', function (done) {
+    it('calculates missing stop positions when possible (one % stop position defined after, one undefined before)', function (done) {
         testGradient('#f00, transparent, #0f0 70%',
                      '#f00, rgba(255, 0, 0, 0) 35%, rgba(0, 255, 0, 0) 35%, #0f0 70%', done);
     });
 
-    it('calculates missing stop points when possible (one % stop point defined after, two undefined before)', function (done) {
+    it('calculates missing stop positions when possible (one % stop position defined after, two undefined before)', function (done) {
         testGradient('#f00, #0f0, transparent, #00f 70%',
                      '#f00, #0f0, rgba(0, 255, 0, 0) 46.67%, rgba(0, 0, 255, 0) 46.67%, #00f 70%', done);
     });
 
-    it('calculates missing stop points when possible (two stop points defined)', function (done) {
+    it('calculates missing stop positions when possible (two stop positions defined)', function (done) {
         testGradient('#f00 20px, transparent, #0f0 50px',
                      '#f00 20px, rgba(255, 0, 0, 0) 35px, rgba(0, 255, 0, 0) 35px, #0f0 50px', done);
+    });
+
+    it('doesn\'t need to calculate a missing stop position when transparent is between identical colours', function (done) {
+        testGradient('#00f, transparent, #00f',
+                     '#00f, rgba(0, 0, 255, 0), #00f', done);
     });
 
     it('generates a warning when missing stop points can\'t be calculated (missing non-% unit)', function (done) {
@@ -160,25 +180,25 @@ describe('postcss-gradient-transparency-fix', function () {
         testGradient(input, input, [plugin.ERROR_STOP_POSITION], done);
     });
 
-    // it('handles multiple transparent values in a single gradient', function (done) {
-    //     testGradient('#f00, transparent, #0f0, transparent, #00f',
-    //                  '#f00, rgba(255, 0, 0, 0) 25%, rgba(0, 255, 0, 0) 25%, #0f0, rgba(0, 255, 0, 0) 75%, rgba(0, 0, 255, 0) 75%, #00f', done);
-    // });
+    it('handles multiple transparent values in a single gradient', function (done) {
+        testGradient('#f00, transparent, #0f0, transparent, #00f',
+                     '#f00, rgba(255, 0, 0, 0) 25%, rgba(0, 255, 0, 0) 25%, #0f0, rgba(0, 255, 0, 0) 75%, rgba(0, 0, 255, 0) 75%, #00f', done);
+    });
 
-    // it('handles consecutive transparent values (middle)', function (done) {
-    //     testGradient('#f00, transparent, transparent, #0f0',
-    //                  '#f00, rgba(255, 0, 0, 0) 33%, rgba(0, 255, 0, 0) 67%, #0f0', done);
-    // });
+    it('optimises stops for consecutive transparent values (middle)', function (done) {
+        testGradient('#f00, transparent, transparent, #0f0',
+                     '#f00, rgba(255, 0, 0, 0) 33%, rgba(0, 255, 0, 0) 67%, #0f0', done);
+    });
 
-    // it('handles consecutive transparent values (middle with stop points)', function (done) {
-    //     testGradient('#f00, transparent 25%, transparent 73%, #0f0',
-    //                  '#f00, rgba(255, 0, 0, 0) 25%, rgba(0, 255, 0, 0) 73%, #0f0', done);
-    // });
+    it('optimises stops for consecutive transparent values (middle with stop points)', function (done) {
+        testGradient('#f00, transparent 25%, transparent 73%, #0f0',
+                     '#f00, rgba(255, 0, 0, 0) 25%, rgba(0, 255, 0, 0) 73%, #0f0', done);
+    });
 
-    // it('handles consecutive transparent values (start)', function (done) {
-    //     testGradient('transparent, transparent, #0f0',
-    //                  'rgba(0, 255, 0, 0) 0%, rgba(0, 255, 0, 0) 50%, #0f0', done);
-    // });
+    it('optimises stops for consecutive transparent values (start)', function (done) {
+        testGradient('transparent, transparent, #0f0',
+                     'rgba(0, 255, 0, 0) 0%, rgba(0, 255, 0, 0) 50%, #0f0', done);
+    });
 
     it('handles multiple gradients', function (done) {
         testGradient('transparent, blue), linear-gradient(red, transparent',
