@@ -27,6 +27,10 @@ function isCalc(node) {
     return node && node.type === 'function' && node.value === 'calc';
 }
 
+function isTransparentStop(stop) {
+    return !!stop.colorNode && stop.colorNode.type === 'word' && stop.colorNode.value === 'transparent';
+}
+
 function getColor(node, logErrors) {
     var ret;
     try {
@@ -320,7 +324,7 @@ function assignStopPositions(gradient, warnings) {
     var stop, beforeStop, midStops, afterStop, si, checkStop, positions;
     for (var i = 0, ii = stops.length; i < ii; i++) {
         stop = stops[i];
-        if (stop.positionNumber === undefined) {
+        if (stop.positionUnit === undefined) {
             beforeStop = stops[i - 1];
             midStops = [stop];
             afterStop = undefined;
@@ -334,10 +338,14 @@ function assignStopPositions(gradient, warnings) {
                 }
             }
             // Check for missing values
+            var shouldWarn = midStops.some(function (s) {
+                return isTransparentStop(s);
+            });
             positions = calculateStopPositions(beforeStop, afterStop, midStops.length);
-            console.log(positions);
             if (positions.warning) {
-                warnings.push(positions.warning);
+                if (shouldWarn) {
+                    warnings.push(positions.warning);
+                }
                 i += midStops.length;
             } else {
                 positions.values && positions.values.forEach(function (value, vi) {
@@ -354,11 +362,10 @@ function fixGradient(imageNode, warnings) {
 
     // Run through each stop and pre-calculate any missing stop positions (where possible)
     assignStopPositions(gradient, warnings);
-    // console.log(gradient.stops)
 
     // Fix transparent values
     gradient.walkStops(function (stop, i) {
-        if (stop.colorNode.type === 'word' && stop.colorNode.value === 'transparent') {
+        if (isTransparentStop(stop)) {
             var prevStop = gradient.stops[i - 1];
             var nextStop = gradient.stops[i + 1];
             // (red, transparent)
