@@ -71,13 +71,12 @@ function round(num, precision) {
 
 // ----- DOMAIN OBJECT: COLOR STOP -----
 
-function ColorStop(nodes) {
+function ColorStop() {
     this.parent = null;
-    nodes = nodes || {};
-    this.beforeNode    = nodes.beforeNode;
-    this.colorNode     = nodes.colorNode;
-    this.separatorNode = nodes.separatorNode;
-    this.positionNode  = nodes.positionNode;
+    this.beforeNode = null;
+    this.colorNode = null;
+    this.separatorNode = null;
+    this.positionNode = null;
     this.parsePosition();
 }
 
@@ -91,14 +90,17 @@ ColorStop.prototype.nodes = function () {
 };
 
 ColorStop.prototype.clone = function () {
-    var nodes = {};
-    ['before', 'color', 'separator', 'position'].forEach(function (prop) {
-        var key = prop + 'Node';
-        if (this[key]) {
-            nodes[key] = JSON.parse(JSON.stringify(this[key]));
+    var stop = new ColorStop();
+    var keys = [
+        'parent', 'beforeNode', 'colorNode', 'separatorNode', 'positionNode'
+    ];
+    keys.forEach(function (key) {
+        if (this[key] !== undefined) {
+            var value = this[key];
+            stop[key] = key === 'parent' ? value : JSON.parse(JSON.stringify(value));
         }
     }, this);
-    return new ColorStop(nodes);
+    return stop;
 };
 
 ColorStop.prototype.setColor = function (colorString) {
