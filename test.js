@@ -120,14 +120,24 @@ describe('postcss-gradient-transparency-fix', function () {
                      '#f00, rgba(255, 0, 0, 0) 50%, rgba(0, 255, 0, 0) 50%, #0f0', done);
     });
 
-    it('calculates missing stop points when possible (one % stop point defined before)', function (done) {
+    it('calculates missing stop points when possible (one % stop point defined before, one undefined after)', function (done) {
         testGradient('#f00 30%, transparent, #0f0',
                      '#f00 30%, rgba(255, 0, 0, 0) 65%, rgba(0, 255, 0, 0) 65%, #0f0', done);
     });
 
-    it('calculates missing stop points when possible (one % stop point defined after)', function (done) {
+    it('calculates missing stop points when possible (one % stop point defined before, two undefined after)', function (done) {
+        testGradient('#f00 30%, transparent, #0f0, #00f',
+                     '#f00 30%, rgba(255, 0, 0, 0) 53.33%, rgba(0, 255, 0, 0) 53.33%, #0f0, #00f', done);
+    });
+
+    it('calculates missing stop points when possible (one % stop point defined after, one undefined before)', function (done) {
         testGradient('#f00, transparent, #0f0 70%',
                      '#f00, rgba(255, 0, 0, 0) 35%, rgba(0, 255, 0, 0) 35%, #0f0 70%', done);
+    });
+
+    it('calculates missing stop points when possible (one % stop point defined after, two undefined before)', function (done) {
+        testGradient('#f00, #0f0, transparent, #00f 70%',
+                     '#f00, #0f0, rgba(0, 255, 0, 0) 46.67%, rgba(0, 0, 255, 0) 46.67%, #00f 70%', done);
     });
 
     it('calculates missing stop points when possible (two stop points defined)', function (done) {

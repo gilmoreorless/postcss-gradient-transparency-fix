@@ -44,12 +44,6 @@ function unitValue(node) {
     return node ? valueParser.unit(node.value) : false;
 }
 
-function midPoint(val1, val2) {
-    var num1 = +val1 || 0;
-    var num2 = +val2 || 0;
-    return num1 + (num2 - num1) / 2;
-}
-
 /**
  * Generate a range of evenly-spaced numbers between start and end values (inclusive)
  */
@@ -63,6 +57,11 @@ function midRange(start, end, count) {
         ret.push(start + incr * i);
     }
     return ret;
+}
+
+function round(num, precision) {
+    var exp = Math.pow(10, precision);
+    return Math.round(num * exp) / exp;
 }
 
 
@@ -276,9 +275,24 @@ function calculateStopPositions(stop1, stop2, count) {
         return bad(errorString);
     }
 
-    var pos1 = stop1 ? unitValue(stop1.positionNode) : { number: '0', unit: '%' };
-    var pos2 = stop2 ? unitValue(stop2.positionNode) : { number: '100', unit: '%' };
     var startPos, endPos, baseUnit;
+    var hasStartPos = true;
+    var hasEndPos = true;
+
+    var pos1 = stop1 && unitValue(stop1.positionNode);
+    var pos2 = stop2 && unitValue(stop2.positionNode);
+    if (!pos1) {
+        hasStartPos = false;
+        pos1 = { number: '0', unit: '%' };
+    } else {
+        count++;
+    }
+    if (!pos2) {
+        hasEndPos = false;
+        pos2 = { number: '100', unit: '%' };
+    } else {
+        count++;
+    }
 
     // Check if missing stops can be calculated
     if (pos1.unit !== pos2.unit) {
@@ -290,6 +304,14 @@ function calculateStopPositions(stop1, stop2, count) {
 
     // Generate as many missing positions as required
     var positions = midRange(startPos, endPos, count);
+    // Take off any known positions
+    if (hasStartPos) {
+        positions.shift();
+    }
+    if (hasEndPos) {
+        positions.pop();
+    }
+
     return good(positions, baseUnit);
 }
 
@@ -301,6 +323,7 @@ function assignStopPositions(gradient, warnings) {
         if (stop.positionNumber === undefined) {
             beforeStop = stops[i - 1];
             midStops = [stop];
+            afterStop = undefined;
             for (si = i + 1; si < ii; si++) {
                 checkStop = stops[si];
                 if (checkStop.positionNumber === undefined) {
@@ -330,7 +353,7 @@ function fixGradient(imageNode, warnings) {
     var gradient = new Gradient(imageNode);
 
     // Run through each stop and pre-calculate any missing stop positions (where possible)
-    assignStopPositions(gradient);
+    assignStopPositions(gradient, warnings);
     // console.log(gradient.stops)
 
     // Fix transparent values
@@ -353,7 +376,7 @@ function fixGradient(imageNode, warnings) {
                     if (!stop.positionUnit) {
                         return;
                     }
-                    stop.setPosition(stop.positionNumber, stop.positionUnit);
+                    stop.setPosition(round(stop.positionNumber, 2), stop.positionUnit);
                 }
                 // Create an extra stop at the same position
                 var extraStop = stop.clone();
