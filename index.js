@@ -146,7 +146,8 @@ ColorStop.prototype.parsePosition = function () {
     }
 };
 
-ColorStop.prototype.getTransparentColor = function () {
+ColorStop.prototype.getTransparentColor = function (opts) {
+    opts = opts || {};
     var node = this.colorNode;
     if (!node) {
         return 'rgba(0, 0, 0, 0)';
@@ -155,7 +156,7 @@ ColorStop.prototype.getTransparentColor = function () {
     parsed.alpha(0);
     // Try to match the input format as much as possible
     var fn = 'rgbString';
-    if (node.type === 'function' && isHsl(node.value)) {
+    if (opts.matchFormat !== false && node.type === 'function' && isHsl(node.value)) {
         fn = 'hslString';
     }
     return parsed[fn]();
@@ -380,6 +381,12 @@ function fixGradient(imageNode, warnings) {
             } else if (prevStop && nextStop) {
                 // TODO: Skip this section if prev colour and next colour are the same (#2)
                 if (!stop.positionNode) {
+                // Check if surrounding colours are the same (regardless of alpha values)
+                var prevColor = prevStop.getTransparentColor({ matchFormat: false });
+                var nextColor = nextStop.getTransparentColor({ matchFormat: false });
+                var sameSurroundColors = prevColor === nextColor;
+                // Add a stop position if required
+                if (!stop.positionNode && !sameSurroundColors) {
                     // Position number/unit should have been pre-calculated.
                     // If it's missing, the position can't be worked out, so nothing more can be done for this stop.
                     if (!stop.positionUnit) {
@@ -387,11 +394,14 @@ function fixGradient(imageNode, warnings) {
                     }
                     stop.setPosition(round(stop.positionNumber, 2), stop.positionUnit);
                 }
-                // Create an extra stop at the same position
-                var extraStop = stop.clone();
                 stop.setColor(prevStop.getTransparentColor());
-                extraStop.setColor(nextStop.getTransparentColor());
-                gradient.insertStopAfter(extraStop, stop);
+                // Create an extra stop at the same position
+                var needsExtraStop = !sameSurroundColors;
+                if (needsExtraStop) {
+                    var extraStop = stop.clone();
+                    extraStop.setColor(nextStop.getTransparentColor());
+                    gradient.insertStopAfter(extraStop, stop);
+                }
             }
         }
     });
