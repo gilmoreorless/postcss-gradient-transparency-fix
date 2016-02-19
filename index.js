@@ -77,6 +77,7 @@ function ColorStop() {
     this.colorNode = null;
     this.separatorNode = null;
     this.positionNode = null;
+    this.warning = null;
     this.parsePosition();
 }
 
@@ -322,7 +323,7 @@ function calculateStopPositions(stop1, stop2, count) {
     return good(positions, baseUnit);
 }
 
-function assignStopPositions(gradient, warnings) {
+function assignStopPositions(gradient) {
     var stops = gradient.stops;
     var stop, beforeStop, midStops, afterStop, si, checkStop, positions;
     for (var i = 0, ii = stops.length; i < ii; i++) {
@@ -341,14 +342,13 @@ function assignStopPositions(gradient, warnings) {
                 }
             }
             // Check for missing values
-            var shouldWarn = midStops.some(function (s) {
-                return isTransparentStop(s);
-            });
             positions = calculateStopPositions(beforeStop, afterStop, midStops.length);
             if (positions.warning) {
-                if (shouldWarn) {
-                    warnings.push(positions.warning);
-                }
+                midStops.forEach(function (s) {
+                    if (isTransparentStop(s)) {
+                        s.warning = positions.warning;
+                    }
+                });
                 i += midStops.length;
             } else {
                 positions.values && positions.values.forEach(function (value, vi) {
@@ -364,7 +364,7 @@ function fixGradient(imageNode, warnings) {
     var gradient = new Gradient(imageNode);
 
     // Run through each stop and pre-calculate any missing stop positions (where possible)
-    assignStopPositions(gradient, warnings);
+    assignStopPositions(gradient);
 
     // Fix transparent values
     gradient.walkStops(function (stop, i) {
@@ -390,6 +390,9 @@ function fixGradient(imageNode, warnings) {
                     // Position number/unit should have been pre-calculated.
                     // If it's missing, the position can't be worked out, so nothing more can be done for this stop.
                     if (!stop.positionUnit) {
+                        if (stop.warning) {
+                            warnings.push(stop.warning);
+                        }
                         return;
                     }
                     stop.setPosition(round(stop.positionNumber, 2), stop.positionUnit);

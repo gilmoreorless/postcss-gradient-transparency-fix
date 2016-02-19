@@ -165,6 +165,11 @@ describe('postcss-gradient-transparency-fix', function () {
                      '#00f, rgba(0, 0, 255, 0), #00f', done);
     });
 
+    it('doesn\'t warn about a missing stop position when transparent is between identical colours', function (done) {
+        testGradient('#00f calc(10% + 10px), transparent, #00f',
+                     '#00f calc(10% + 10px), rgba(0, 0, 255, 0), #00f', done);
+    });
+
     it('generates a warning when missing stop points can\'t be calculated (missing non-% unit)', function (done) {
         var input = '#f00 20px, transparent, #0f0';
         testGradient(input, input, [plugin.ERROR_STOP_POSITION], done);
