@@ -81,15 +81,6 @@ function ColorStop() {
     this.parsePosition();
 }
 
-ColorStop.prototype.nodes = function () {
-    var nodes = [];
-    if (this.beforeNode)    nodes.push(this.beforeNode);
-    if (this.colorNode)     nodes.push(this.colorNode);
-    if (this.separatorNode) nodes.push(this.separatorNode);
-    if (this.positionNode)  nodes.push(this.positionNode);
-    return nodes;
-};
-
 ColorStop.prototype.clone = function () {
     var stop = new ColorStop();
     var keys = [
@@ -170,6 +161,17 @@ Object.defineProperties(ColorStop.prototype, {
                 var color = getColor(this.colorNode);
                 return color && color.alpha() === 0;
             }
+        }
+    },
+
+    nodes: {
+        get: function () {
+            var nodes = [];
+            if (this.beforeNode)    nodes.push(this.beforeNode);
+            if (this.colorNode)     nodes.push(this.colorNode);
+            if (this.separatorNode) nodes.push(this.separatorNode);
+            if (this.positionNode)  nodes.push(this.positionNode);
+            return nodes;
         }
     }
 });
@@ -270,7 +272,7 @@ Gradient.prototype.insertStopAfter = function (newStop, afterStop) {
 
 Gradient.prototype.syncNodes = function () {
     var stopNodes = this.stops.reduce(function (memo, stop) {
-        return memo.concat(stop.nodes());
+        return memo.concat(stop.nodes);
     }, []);
     this.node.nodes = [].concat(this.preludeNodes, stopNodes);
 };
