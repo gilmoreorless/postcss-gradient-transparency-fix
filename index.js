@@ -163,6 +163,17 @@ ColorStop.prototype.getTransparentColor = function (opts) {
     return parsed[fn]();
 };
 
+Object.defineProperties(ColorStop.prototype, {
+    isFullyTransparent: {
+        get: function () {
+            if (this.colorNode) {
+                var color = getColor(this.colorNode);
+                return color && color.alpha() === 0;
+            }
+        }
+    }
+});
+
 
 // ----- DOMAIN OBJECT: GRADIENT -----
 
@@ -371,22 +382,23 @@ function fixGradient(imageNode, warnings) {
         if (isTransparentStop(stop)) {
             var prevStop = gradient.stops[i - 1];
             var nextStop = gradient.stops[i + 1];
-            // (red, transparent)
+            // (red, TRANSPARENT)
             if (prevStop && !nextStop) {
                 stop.setColor(prevStop.getTransparentColor());
-            // (transparent, red)
+            // (TRANSPARENT, red)
             } else if (!prevStop && nextStop) {
                 stop.setColor(nextStop.getTransparentColor());
-            // (red, transparent, blue)
+            // (red, TRANSPARENT, blue)
             } else if (prevStop && nextStop) {
-                // TODO: Skip this section if prev colour and next colour are the same (#2)
-                if (!stop.positionNode) {
                 // Check if surrounding colours are the same (regardless of alpha values)
                 var prevColor = prevStop.getTransparentColor({ matchFormat: false });
                 var nextColor = nextStop.getTransparentColor({ matchFormat: false });
-                var sameSurroundColors = prevColor === nextColor;
+                var isSurroundedBySameColors = prevColor === nextColor;
+                var isConsecutiveTransparent = prevStop.isFullyTransparent || nextStop.isFullyTransparent;
+                var needsExtraStop = !isSurroundedBySameColors && !isConsecutiveTransparent;
+
                 // Add a stop position if required
-                if (!stop.positionNode && !sameSurroundColors) {
+                if (!stop.positionNode && needsExtraStop) {
                     // Position number/unit should have been pre-calculated.
                     // If it's missing, the position can't be worked out, so nothing more can be done for this stop.
                     if (!stop.positionUnit) {
@@ -397,9 +409,15 @@ function fixGradient(imageNode, warnings) {
                     }
                     stop.setPosition(round(stop.positionNumber, 2), stop.positionUnit);
                 }
-                stop.setColor(prevStop.getTransparentColor());
+
+                // Get the right rgb values for the transparency, based on surrounding stops
+                var transparentColor = prevStop.getTransparentColor();
+                if (!needsExtraStop && prevStop.isFullyTransparent) {
+                    transparentColor = nextStop.getTransparentColor();
+                }
+                stop.setColor(transparentColor);
+
                 // Create an extra stop at the same position
-                var needsExtraStop = !sameSurroundColors;
                 if (needsExtraStop) {
                     var extraStop = stop.clone();
                     extraStop.setColor(nextStop.getTransparentColor());

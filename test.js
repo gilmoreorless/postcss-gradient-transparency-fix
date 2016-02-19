@@ -84,7 +84,6 @@ describe('postcss-gradient-transparency-fix', function () {
                      '#5adCab,rgba(90, 220, 171, 0)', done);
     });
 
-    // TODO: Submit fix to color-string module to get this working (#3)
     // it('corrects 8-digit hex value', function (done) {
     //     testGradient('#fee1600d, transparent',
     //                  '#fee1600d, rgba(254, 225, 96, 0)', done);
@@ -192,7 +191,7 @@ describe('postcss-gradient-transparency-fix', function () {
 
     it('optimises stops for consecutive transparent values (middle)', function (done) {
         testGradient('#f00, transparent, transparent, #0f0',
-                     '#f00, rgba(255, 0, 0, 0) 33%, rgba(0, 255, 0, 0) 67%, #0f0', done);
+                     '#f00, rgba(255, 0, 0, 0), rgba(0, 255, 0, 0), #0f0', done);
     });
 
     it('optimises stops for consecutive transparent values (middle with stop points)', function (done) {
@@ -202,7 +201,12 @@ describe('postcss-gradient-transparency-fix', function () {
 
     it('optimises stops for consecutive transparent values (start)', function (done) {
         testGradient('transparent, transparent, #0f0',
-                     'rgba(0, 255, 0, 0) 0%, rgba(0, 255, 0, 0) 50%, #0f0', done);
+                     'rgba(0, 0, 0, 0), rgba(0, 255, 0, 0), #0f0', done);
+    });
+
+    it('optimises stops for consecutive transparent values (end)', function (done) {
+        testGradient('#0f0, transparent, transparent',
+                     '#0f0, rgba(0, 255, 0, 0), rgba(0, 255, 0, 0)', done);
     });
 
     it('handles multiple gradients', function (done) {
