@@ -71,34 +71,28 @@ function round(num, precision) {
 
 // ----- DOMAIN OBJECT: COLOR STOP -----
 
-function ColorStop(nodes) {
+function ColorStop() {
     this.parent = null;
-    nodes = nodes || {};
-    this.beforeNode    = nodes.beforeNode;
-    this.colorNode     = nodes.colorNode;
-    this.separatorNode = nodes.separatorNode;
-    this.positionNode  = nodes.positionNode;
+    this.beforeNode = null;
+    this.colorNode = null;
+    this.separatorNode = null;
+    this.positionNode = null;
+    this.warning = null;
     this.parsePosition();
 }
 
-ColorStop.prototype.nodes = function () {
-    var nodes = [];
-    if (this.beforeNode)    nodes.push(this.beforeNode);
-    if (this.colorNode)     nodes.push(this.colorNode);
-    if (this.separatorNode) nodes.push(this.separatorNode);
-    if (this.positionNode)  nodes.push(this.positionNode);
-    return nodes;
-};
-
 ColorStop.prototype.clone = function () {
-    var nodes = {};
-    ['before', 'color', 'separator', 'position'].forEach(function (prop) {
-        var key = prop + 'Node';
-        if (this[key]) {
-            nodes[key] = JSON.parse(JSON.stringify(this[key]));
+    var stop = new ColorStop();
+    var keys = [
+        'parent', 'beforeNode', 'colorNode', 'separatorNode', 'positionNode'
+    ];
+    keys.forEach(function (key) {
+        if (this[key] !== undefined) {
+            var value = this[key];
+            stop[key] = key === 'parent' ? value : JSON.parse(JSON.stringify(value));
         }
     }, this);
-    return new ColorStop(nodes);
+    return stop;
 };
 
 ColorStop.prototype.setColor = function (colorString) {
@@ -144,7 +138,8 @@ ColorStop.prototype.parsePosition = function () {
     }
 };
 
-ColorStop.prototype.getTransparentColor = function () {
+ColorStop.prototype.getTransparentColor = function (opts) {
+    opts = opts || {};
     var node = this.colorNode;
     if (!node) {
         return 'rgba(0, 0, 0, 0)';
@@ -153,11 +148,33 @@ ColorStop.prototype.getTransparentColor = function () {
     parsed.alpha(0);
     // Try to match the input format as much as possible
     var fn = 'rgbString';
-    if (node.type === 'function' && isHsl(node.value)) {
+    if (opts.matchFormat !== false && node.type === 'function' && isHsl(node.value)) {
         fn = 'hslString';
     }
     return parsed[fn]();
 };
+
+Object.defineProperties(ColorStop.prototype, {
+    isFullyTransparent: {
+        get: function () {
+            if (this.colorNode) {
+                var color = getColor(this.colorNode);
+                return color && color.alpha() === 0;
+            }
+        }
+    },
+
+    nodes: {
+        get: function () {
+            var nodes = [];
+            if (this.beforeNode)    nodes.push(this.beforeNode);
+            if (this.colorNode)     nodes.push(this.colorNode);
+            if (this.separatorNode) nodes.push(this.separatorNode);
+            if (this.positionNode)  nodes.push(this.positionNode);
+            return nodes;
+        }
+    }
+});
 
 
 // ----- DOMAIN OBJECT: GRADIENT -----
@@ -255,7 +272,7 @@ Gradient.prototype.insertStopAfter = function (newStop, afterStop) {
 
 Gradient.prototype.syncNodes = function () {
     var stopNodes = this.stops.reduce(function (memo, stop) {
-        return memo.concat(stop.nodes());
+        return memo.concat(stop.nodes);
     }, []);
     this.node.nodes = [].concat(this.preludeNodes, stopNodes);
 };
@@ -319,7 +336,7 @@ function calculateStopPositions(stop1, stop2, count) {
     return good(positions, baseUnit);
 }
 
-function assignStopPositions(gradient, warnings) {
+function assignStopPositions(gradient) {
     var stops = gradient.stops;
     var stop, beforeStop, midStops, afterStop, si, checkStop, positions;
     for (var i = 0, ii = stops.length; i < ii; i++) {
@@ -338,14 +355,13 @@ function assignStopPositions(gradient, warnings) {
                 }
             }
             // Check for missing values
-            var shouldWarn = midStops.some(function (s) {
-                return isTransparentStop(s);
-            });
             positions = calculateStopPositions(beforeStop, afterStop, midStops.length);
             if (positions.warning) {
-                if (shouldWarn) {
-                    warnings.push(positions.warning);
-                }
+                midStops.forEach(function (s) {
+                    if (isTransparentStop(s)) {
+                        s.warning = positions.warning;
+                    }
+                });
                 i += midStops.length;
             } else {
                 positions.values && positions.values.forEach(function (value, vi) {
@@ -361,35 +377,54 @@ function fixGradient(imageNode, warnings) {
     var gradient = new Gradient(imageNode);
 
     // Run through each stop and pre-calculate any missing stop positions (where possible)
-    assignStopPositions(gradient, warnings);
+    assignStopPositions(gradient);
 
     // Fix transparent values
     gradient.walkStops(function (stop, i) {
         if (isTransparentStop(stop)) {
             var prevStop = gradient.stops[i - 1];
             var nextStop = gradient.stops[i + 1];
-            // (red, transparent)
+            // (red, TRANSPARENT)
             if (prevStop && !nextStop) {
                 stop.setColor(prevStop.getTransparentColor());
-            // (transparent, red)
+            // (TRANSPARENT, red)
             } else if (!prevStop && nextStop) {
                 stop.setColor(nextStop.getTransparentColor());
-            // (red, transparent, blue)
+            // (red, TRANSPARENT, blue)
             } else if (prevStop && nextStop) {
-                // TODO: Skip this section if prev colour and next colour are the same (#2)
-                if (!stop.positionNode) {
+                // Check if surrounding colours are the same (regardless of alpha values)
+                var prevColor = prevStop.getTransparentColor({ matchFormat: false });
+                var nextColor = nextStop.getTransparentColor({ matchFormat: false });
+                var isSurroundedBySameColors = prevColor === nextColor;
+                var isConsecutiveTransparent = prevStop.isFullyTransparent || nextStop.isFullyTransparent;
+                var needsExtraStop = !isSurroundedBySameColors && !isConsecutiveTransparent;
+
+                // Add a stop position if required
+                if (!stop.positionNode && needsExtraStop) {
                     // Position number/unit should have been pre-calculated.
                     // If it's missing, the position can't be worked out, so nothing more can be done for this stop.
                     if (!stop.positionUnit) {
+                        if (stop.warning) {
+                            warnings.push(stop.warning);
+                        }
                         return;
                     }
                     stop.setPosition(round(stop.positionNumber, 2), stop.positionUnit);
                 }
+
+                // Get the right rgb values for the transparency, based on surrounding stops
+                var transparentColor = prevStop.getTransparentColor();
+                if (!needsExtraStop && prevStop.isFullyTransparent) {
+                    transparentColor = nextStop.getTransparentColor();
+                }
+                stop.setColor(transparentColor);
+
                 // Create an extra stop at the same position
-                var extraStop = stop.clone();
-                stop.setColor(prevStop.getTransparentColor());
-                extraStop.setColor(nextStop.getTransparentColor());
-                gradient.insertStopAfter(extraStop, stop);
+                if (needsExtraStop) {
+                    var extraStop = stop.clone();
+                    extraStop.setColor(nextStop.getTransparentColor());
+                    gradient.insertStopAfter(extraStop, stop);
+                }
             }
         }
     });

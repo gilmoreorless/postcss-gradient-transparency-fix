@@ -28,7 +28,8 @@
     "mocha": "2.4.5"
   },
   "scripts": {
-    "test": "mocha",
+    "lint": "eslint *.js",
+    "test": "mocha && npm run lint",
     "test/watch": "mocha --watch"
   },
   "eslintConfig": {
