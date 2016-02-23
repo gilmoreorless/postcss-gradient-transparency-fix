@@ -29,8 +29,8 @@
   },
   "scripts": {
     "lint": "eslint *.js",
-    "test": "mocha && npm run lint",
-    "test/watch": "mocha --watch"
+    "test": "mocha tests/mocha.js && npm run lint",
+    "test/watch": "mocha --watch tests/mocha.js"
   },
   "eslintConfig": {
     "extends": "eslint-config-postcss/es5"
