@@ -28,9 +28,10 @@
     "mocha": "^2.4.5"
   },
   "scripts": {
-    "lint": "eslint *.js",
-    "test": "mocha tests/mocha.js && npm run lint",
-    "test/watch": "mocha --watch tests/mocha.js"
+    "lint": "eslint **/*.js",
+    "test": "mocha tests/core-tests.js && npm run lint",
+    "test/watch": "mocha --watch tests/core-tests.js --reporter dot",
+    "test/visual": "mocha tests/core-tests.js --reporter tests/reporter-gradients"
   },
   "eslintConfig": {
     "extends": "eslint-config-postcss/es5"
