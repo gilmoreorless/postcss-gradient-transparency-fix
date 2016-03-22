@@ -1,7 +1,7 @@
 {
+    "extends": "eslint-config-postcss/es5",
     "rules": {
         "max-len": [1, 180],
-        "no-extra-parens": [0],
-        "prefer-spread": [0]
+        "no-extra-parens": [0]
     }
 }
