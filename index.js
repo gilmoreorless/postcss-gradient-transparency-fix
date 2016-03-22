@@ -161,6 +161,7 @@ Object.defineProperties(ColorStop.prototype, {
                 var color = getColor(this.colorNode);
                 return color && color.alpha() === 0;
             }
+            return false;
         }
     },
 
@@ -438,6 +439,7 @@ function fixAllGradients(value) {
             fixGradient(node, warnings);
             return false;
         }
+        return true;
     });
     return {
         value: parsed.toString(),

@@ -24,16 +24,13 @@
   "devDependencies": {
     "chai": "^3.5.0",
     "eslint": "^2.2.0",
-    "eslint-config-postcss": "^2.0.0",
+    "eslint-config-postcss": "^2.0.2",
     "mocha": "^2.4.5"
   },
   "scripts": {
-    "lint": "eslint **/*.js",
+    "lint": "eslint .",
     "test": "mocha tests/core-tests.js && npm run lint",
     "test/watch": "mocha --watch tests/core-tests.js --reporter dot",
     "test/visual": "mocha tests/core-tests.js --reporter tests/reporter-gradients"
-  },
-  "eslintConfig": {
-    "extends": "eslint-config-postcss/es5"
   }
 }
