@@ -42,7 +42,7 @@ function GradientReporter(runner) {
     }
 
     function writeHTML() {
-        var htmlTemplate = fs.readFileSync(path.join(__dirname, 'visual-template.html'), {encoding: 'utf-8'});
+        var htmlTemplate = fs.readFileSync(path.join(__dirname, 'visual-template.html'), { encoding: 'utf-8' });
         var htmlOutput = htmlTemplate.replace('{{{content}}}', htmlBits.join('\n'));
         var outputFilename = path.join(os.tmpdir(), 'postcss-gradient-tests.html');
         fs.writeFileSync(outputFilename, htmlOutput);
@@ -60,6 +60,7 @@ function GradientReporter(runner) {
 
     runner.on('end', function () {
         // Mocha swallows errors here so this is a bypass to make sure they're visible
+        /* eslint no-process-exit: 0 */
         try {
             writeHTML();
             process.exit(0);

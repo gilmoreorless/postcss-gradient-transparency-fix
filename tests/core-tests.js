@@ -36,7 +36,7 @@ function test(input, output, warnings, done) {
             curData.error = error;
             done(error);
         });
-};
+}
 
 function testProperty(prop, gradType, input, output, warnings, done) {
     var prefix = '.test{ ' + prop + ':' + gradType + '-gradient( ';
@@ -44,11 +44,11 @@ function testProperty(prop, gradType, input, output, warnings, done) {
     input = prefix + input + suffix;
     output = prefix + output + suffix;
     return test(input, output, warnings, done);
-};
+}
 
 function testGradient(input, output, warnings, done) {
     return testProperty('background-image', 'linear', input, output, warnings, done);
-};
+}
 
 // Keep a reference to the current test so that extra data can be added for different reporters
 beforeEach(function () {
