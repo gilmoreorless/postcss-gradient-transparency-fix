@@ -1,3 +1,7 @@
+# Node stuff
 node_modules/
 npm-debug.log
+
+# VS Code cruft
 .vscode
+typings/

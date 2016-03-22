@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Visual gradient checks | postcss-gradient-transparency-fix test suite</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            max-width: 50em;
+            margin: 0 auto;
+        }
+        .test {
+            border: 1px solid;
+            padding: 0.5em;
+            position: relative;
+        }
+        .test + .test {
+            margin-top: 0.5em;
+        }
+        .test-passed {
+            border-color: green;
+        }
+        .test-failed {
+            border-color: red;
+            border-right-width: 2em;
+        }
+        .test-failed::after {
+            content: 'Failed';
+            color: white;
+            position: absolute;
+            top: 0;
+            right: -3.75em;
+            transform: rotate(90deg);
+            transform-origin: 0 50%;
+        }
+        .example {
+            width: 3em;
+            height: 6em;
+            background-repeat: no-repeat;
+            float: left;
+        }
+        .test p {
+            clear: both;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>postcss-gradient-transparency-fix visual tests</h1>
+        <div class="description">
+            <p>
+                This is a page for manually checking the visual output of the <code>postcss-gradient-transparency-fix</code> plugin.
+                At some future point this might get run through automated visual regression tests, but for now it’s just a sanity check.
+            </p>
+            <ul>
+                <li>If this page is opened in Safari, it shows the gradients before/after fixing.
+                    There should be a huge difference in the gradients in each pair.</li>
+                <li>If this page is opened in any other browser, each test <em>should</em> show two identical gradients.
+                    If they’re not identical, the plugin is <strong>wrong</strong>.</li>
+            </ul>
+        </div>
+    </header>
+    <div id="tests">
+        {{{content}}}
+    </div>
+</body>
+</html>

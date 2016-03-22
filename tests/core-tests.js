@@ -1,42 +1,60 @@
+/* global beforeEach, describe, it */
+
 var postcss = require('postcss');
 var expect  = require('chai').expect;
+var plugin = require('../');
 
-var plugin = require('./');
+var curData;
 
-var test = function (input, output, warnings, done) {
+function testOutput(result, output, warnings, done) {
+    expect(result.css).to.eql(output);
+    if (warnings) {
+        expect(result.warnings().length).to.equal(warnings.length);
+        result.warnings().forEach(function (warning, i) {
+            expect(warning.text).to.equal(warnings[i]);
+        });
+    } else {
+        expect(result.warnings()).to.be.empty;
+    }
+    done();
+}
+
+function test(input, output, warnings, done) {
     if (typeof warnings === 'function' && done === undefined) {
         done = warnings;
         warnings = 0;
     }
-    postcss([ plugin() ]).process(input).then(function (result) {
-        expect(result.css).to.eql(output);
-        if (warnings) {
-            expect(result.warnings().length).to.equal(warnings.length);
-            result.warnings().forEach(function (warning, i) {
-                expect(warning.text).to.equal(warnings[i]);
-            });
-        } else {
-            expect(result.warnings()).to.be.empty;
-        }
-        done();
-    }).catch(function (error) {
-        done(error);
-    });
-};
+    curData.input = input;
+    curData.expected = output;
+    postcss([ plugin() ]).process(input)
+        .then(function (result) {
+            curData.actual = result.css;
+            curData.warnings = result.warnings();
+            testOutput(result, output, warnings, done);
+        })
+        .catch(function (error) {
+            curData.error = error;
+            done(error);
+        });
+}
 
-var testProperty = function (prop, gradType, input, output, warnings, done) {
+function testProperty(prop, gradType, input, output, warnings, done) {
     var prefix = '.test{ ' + prop + ':' + gradType + '-gradient( ';
     var suffix = ' ); }';
     input = prefix + input + suffix;
     output = prefix + output + suffix;
     return test(input, output, warnings, done);
-};
+}
 
-var testGradient = function (input, output, warnings, done) {
+function testGradient(input, output, warnings, done) {
     return testProperty('background-image', 'linear', input, output, warnings, done);
-};
+}
 
-/* global describe, it */
+// Keep a reference to the current test so that extra data can be added for different reporters
+beforeEach(function () {
+    curData = this.currentTest.data = {};
+});
+
 describe('postcss-gradient-transparency-fix', function () {
 
     it('ignores non-gradient transparent values', function (done) {

@@ -29,7 +29,8 @@
   },
   "scripts": {
     "lint": "eslint .",
-    "test": "mocha && npm run lint",
-    "test/watch": "mocha --watch"
+    "test": "mocha tests/core-tests.js && npm run lint",
+    "test/watch": "mocha --watch tests/core-tests.js --reporter dot",
+    "test/visual": "mocha tests/core-tests.js --reporter tests/reporter-gradients"
   }
 }
