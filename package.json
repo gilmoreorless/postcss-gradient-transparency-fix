@@ -1,6 +1,6 @@
 {
   "name": "postcss-gradient-transparency-fix",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "PostCSS plugin to fix gradient transparency for Safari and older browsers",
   "keywords": [
     "postcss",

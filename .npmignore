@@ -1,9 +1,12 @@
 .gitignore
-.vscode
 .editorconfig
+img/
+
+.vscode
+typings/
 
 node_modules/
 npm-debug.log
 
-test.js
+tests/
 .travis.yml

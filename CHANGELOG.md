@@ -2,6 +2,11 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## 1.0.2 - 2016-03-23
+### Changed
+- Updated eslint config and fixed new linting errors
+- Changed test suite structure and included a visual comparison page
+
 ## 1.0.1 - 2016-02-21
 ### Changed
 - Updated npm dependencies
