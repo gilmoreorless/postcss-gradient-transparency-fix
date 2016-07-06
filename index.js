@@ -447,9 +447,7 @@ function fixAllGradients(value) {
     };
 }
 
-module.exports = postcss.plugin('postcss-gradient-transparency-fix', function (opts) {
-    opts = opts || {};
-
+module.exports = postcss.plugin('postcss-gradient-transparency-fix', function () {
     return function (css, result) {
         css.walkDecls(rProp, function (decl) {
             if (hasGradient(decl.value) && hasTransparent(decl.value)) {
