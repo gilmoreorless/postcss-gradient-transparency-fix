@@ -28,10 +28,10 @@ function GradientReporter(runner) {
         htmlBits.push(
             '<div class="test test-' + escape(test.state) + '">',
                 '<h3>' + escape(test.title) + '</h3>',
-	            '<p>Input: <code>' + inputBg + '</code></p>',
+                '<p>Input: <code>' + inputBg + '</code></p>',
                 '<div class="example" style="' + inputBg + '"></div>',
                 '<div class="example" style="' + outputBg + '"></div>',
-	            '<p>Output: <code>' + outputBg + '</code></p>'
+                '<p>Output: <code>' + outputBg + '</code></p>'
         );
         if (test.data.warnings) {
             test.data.warnings.forEach(function (warning) {
