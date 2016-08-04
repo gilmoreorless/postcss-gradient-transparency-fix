@@ -4,7 +4,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 ### Changed
-- Updated eslint dev dependency
+- Updated eslint and mocha dev dependencies
 - Dropped active testing for Node 0.12 (the plugin still works though)
 
 ## 1.0.2 - 2016-03-23
