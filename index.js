@@ -145,13 +145,12 @@ ColorStop.prototype.getTransparentColor = function (opts) {
         return 'rgba(0, 0, 0, 0)';
     }
     var parsed = getColor(node, true);
-    parsed.alpha(0);
     // Try to match the input format as much as possible
-    var fn = 'rgbString';
+    var fn = 'rgb';
     if (opts.matchFormat !== false && node.type === 'function' && isHsl(node.value)) {
-        fn = 'hslString';
+        fn = 'hsl';
     }
-    return parsed[fn]();
+    return parsed.alpha(0)[fn]().string();
 };
 
 Object.defineProperties(ColorStop.prototype, {
