@@ -202,6 +202,11 @@ describe('postcss-gradient-transparency-fix', function () {
         testGradient(input, input, [plugin.ERROR_STOP_POSITION], done);
     });
 
+    it('generates a warning about invalid colours', function (done) {
+        var input = 'transparent, thisdoesntexist'
+        testGradient(input, input, [plugin.ERROR_INVALID_COLOR], done);
+    });
+
     it('handles multiple transparent values in a single gradient', function (done) {
         testGradient('#f00, transparent, #0f0, transparent, #00f',
                      '#f00, rgba(255, 0, 0, 0) 25%, rgba(0, 255, 0, 0) 25%, #0f0, rgba(0, 255, 0, 0) 75%, rgba(0, 0, 255, 0) 75%, #00f', done);
@@ -234,8 +239,8 @@ describe('postcss-gradient-transparency-fix', function () {
 
     it('ignores non-gradient multiple background values', function (done) {
         testProperty('background', 'linear',
-            'transparent, blue), transparent, url(http://example.com/transparent.png)',
-            'rgba(0, 0, 255, 0), blue), transparent, url(http://example.com/transparent.png)', done);
+            'transparent, blue), transparent, url(http://example.com/transparent.png',
+            'rgba(0, 0, 255, 0), blue), transparent, url(http://example.com/transparent.png', done);
     });
 
     it('works with linear-gradient angles (keyword)', function (done) {

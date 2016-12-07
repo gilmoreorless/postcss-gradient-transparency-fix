@@ -4,8 +4,12 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 ### Changed
+- Updated color dependency
 - Updated eslint and mocha dev dependencies
 - Dropped active testing for Node 0.12 (the plugin still works though)
+
+### Fixed
+- Gracefully handle invalid colour definitions (now generates a proper PostCSS warning, instead of logging an exception)
 
 ## 1.0.2 - 2016-03-23
 ### Changed
