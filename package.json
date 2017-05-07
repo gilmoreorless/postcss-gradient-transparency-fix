@@ -18,7 +18,7 @@
   "homepage": "https://github.com/gilmoreorless/postcss-gradient-transparency-fix",
   "dependencies": {
     "color": "^1.0.2",
-    "postcss": "^5.0.14",
+    "postcss": "^6.0.1",
     "postcss-value-parser": "^3.3.0"
   },
   "devDependencies": {
