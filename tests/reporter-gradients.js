@@ -25,20 +25,22 @@ function GradientReporter(runner) {
         }
         inputBg = escape(inputBg);
         outputBg = escape(outputBg);
-        htmlBits.push(
-            '<div class="test test-' + escape(test.state) + '">',
-                '<h3>' + escape(test.title) + '</h3>',
-                '<p>Input: <code>' + inputBg + '</code></p>',
-                '<div class="example" style="' + inputBg + '"></div>',
-                '<div class="example" style="' + outputBg + '"></div>',
-                '<p>Output: <code>' + outputBg + '</code></p>'
-        );
-        if (test.data.warnings) {
-            test.data.warnings.forEach(function (warning) {
-                htmlBits.push('<p class="warning">Warning: <code>' + escape(warning) + '</code></p>');
-            });
-        }
-        htmlBits.push('</div>');
+        var warnings = (test.data.warnings || []).forEach(function (warning) {
+            htmlBits.push(`<p class="warning">Warning: <code>${escape(warning)}</code></p>`);
+        });
+
+        htmlBits.push(`
+            <div class="test test-${escape(test.state)}">
+                <h3>${escape(test.title)}</h3>
+                <p>Input: <pre><code>${inputBg}</code></pre></p>
+                <div class="examples">
+                    <div class="example" style="${inputBg}"></div>
+                    <div class="example" style="${outputBg}"></div>
+                </div>
+                <p>Output: <pre><code>${outputBg}</code></pre></p>
+                ${warnings}
+            </div>
+        `);
     }
 
     function writeHTML() {
