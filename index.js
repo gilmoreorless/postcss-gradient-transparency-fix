@@ -47,6 +47,19 @@ function unitValue(node) {
 }
 
 /**
+ * Append one or more values to the end of `baseArr`.
+ * Acts the same as `baseArr.concat(value)` but mutates instead of returning a copy.
+ */
+function append(baseArr, value) {
+    if (Array.isArray(value)) {
+        baseArr.push.apply(baseArr, value);
+    } else {
+        baseArr.push(value);
+    }
+    return baseArr.length;
+}
+
+/**
  * Generate a range of evenly-spaced numbers between start and end values (inclusive)
  */
 function midRange(start, end, count) {
@@ -71,9 +84,9 @@ function round(num, precision) {
 
 function ColorStop() {
     this.parent = null;
-    this.beforeNode = null;
+    this.beforeNodes = [];
     this.colorNode = null;
-    this.separatorNode = null;
+    this.separatorNodes = [];
     this.positionNode = null;
     this.warning = null;
     this.parsePosition();
@@ -82,7 +95,7 @@ function ColorStop() {
 ColorStop.prototype.clone = function () {
     var stop = new ColorStop();
     var keys = [
-        'parent', 'beforeNode', 'colorNode', 'separatorNode', 'positionNode'
+        'parent', 'beforeNodes', 'colorNode', 'separatorNodes', 'positionNode'
     ];
     keys.forEach(function (key) {
         if (this[key] !== undefined) {
@@ -109,8 +122,8 @@ ColorStop.prototype.setPosition = function (positionString, unit) {
         positionString = '' + positionString + unit;
     }
     var isDirty = false;
-    if (!this.separatorNode) {
-        this.separatorNode = { type: 'space', value: ' ' };
+    if (!this.separatorNodes.length) {
+        this.separatorNodes.push({ type: 'space', value: ' ' });
         isDirty = true;
     }
     if (!this.positionNode) {
@@ -169,11 +182,12 @@ Object.defineProperties(ColorStop.prototype, {
 
     nodes: {
         get: function () {
-            var nodes = [];
-            if (this.beforeNode)    nodes.push(this.beforeNode);
-            if (this.colorNode)     nodes.push(this.colorNode);
-            if (this.separatorNode) nodes.push(this.separatorNode);
-            if (this.positionNode)  nodes.push(this.positionNode);
+            var nodes = [].concat(
+                this.beforeNodes,
+                this.colorNode || [],
+                this.separatorNodes,
+                this.positionNode || []
+            );
             return nodes;
         }
     }
@@ -186,6 +200,7 @@ function Gradient(parsedNode) {
     this.node = {};
     this.preludeNodes = [];
     this.stops = [];
+    this.afterNodes = [];
     this.setNode(parsedNode);
 
     this._actionQueue = [];
@@ -200,14 +215,28 @@ Gradient.prototype.setNode = function (node) {
         curStop.parent = this;
         var isPrelude = false;
         var isFirst = true;
+        var pendingNodes = [];
+        var movePendingNodesTo = function (appendTo) {
+            append(appendTo, pendingNodes);
+            pendingNodes = [];
+        };
         node.nodes.forEach(function (subNode) {
+            // Make sure comments inside the gradient aren't counted as values
+            if (subNode.type === 'comment' || subNode.type === 'space') {
+                append(pendingNodes, subNode);
+                return;
+            }
             // Dividers (commas) define the end of a stop
             if (subNode.type === 'div') {
-                if (!isPrelude) {
+                if (isPrelude) {
+                    movePendingNodesTo(this.preludeNodes);
+                    append(pendingNodes, subNode);
+                } else {
                     stopList.push(curStop);
                     curStop = new ColorStop();
                     curStop.parent = this;
-                    curStop.beforeNode = subNode;
+                    movePendingNodesTo(curStop.beforeNodes);
+                    append(curStop.beforeNodes, subNode);
                 }
                 isPrelude = false;
                 return;
@@ -221,16 +250,15 @@ Gradient.prototype.setNode = function (node) {
                 }
             }
             if (isPrelude) {
-                this.preludeNodes.push(subNode);
-            // Spaces are value separators
-            } else if (subNode.type === 'space') {
-                curStop.separatorNode = subNode;
-            // Function or word is either a colour or a stop position
+                movePendingNodesTo(this.preludeNodes);
+                append(this.preludeNodes, subNode);
             } else if (subNode.type === 'function' || subNode.type === 'word') {
                 if (curStop.colorNode) {
+                    movePendingNodesTo(curStop.separatorNodes);
                     curStop.positionNode = subNode;
                     curStop.parsePosition();
                 } else {
+                    movePendingNodesTo(curStop.beforeNodes);
                     curStop.colorNode = subNode;
                 }
             }
@@ -238,6 +266,7 @@ Gradient.prototype.setNode = function (node) {
         if (curStop.colorNode) {
             stopList.push(curStop);
         }
+        movePendingNodesTo(this.afterNodes);
     }
 };
 
@@ -257,7 +286,7 @@ Gradient.prototype.walkStops = function (fn) {
 Gradient.prototype.insertStopAfter = function (newStop, afterStop) {
     var action = function () {
         // Guarantee that the new stop has a comma node before it
-        newStop.beforeNode = { type: 'div', value: ',', before: '', after: ' ' };
+        newStop.beforeNodes = [{ type: 'div', value: ',', before: '', after: ' ' }];
 
         // Add stop to stops list
         var stopIndex = this.stops.indexOf(afterStop);
@@ -277,7 +306,7 @@ Gradient.prototype.syncNodes = function () {
     var stopNodes = this.stops.reduce(function (memo, stop) {
         return memo.concat(stop.nodes);
     }, []);
-    this.node.nodes = [].concat(this.preludeNodes, stopNodes);
+    this.node.nodes = [].concat(this.preludeNodes, stopNodes, this.afterNodes);
 };
 
 
@@ -466,7 +495,8 @@ module.exports = postcss.plugin('postcss-gradient-transparency-fix', function ()
     return function (css, result) {
         css.walkDecls(rProp, function (decl) {
             if (hasGradient(decl.value) && hasTransparent(decl.value)) {
-                var fixedValue = fixAllGradients(decl.value);
+                var value = decl.raw('value') && decl.raw('value').raw || decl.value;
+                var fixedValue = fixAllGradients(value);
                 decl.value = fixedValue.value;
                 fixedValue.warnings.forEach(function (warning) {
                     decl.warn(result, warning);

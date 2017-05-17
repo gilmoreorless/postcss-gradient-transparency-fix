@@ -2,6 +2,10 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## [Unreleased]
+### Fixed
+- CSS comments in gradient values are no longer stripped out (#18)
+
 ## 1.0.3 - 2016-12-07
 ### Changed
 - Updated color dependency
@@ -22,7 +26,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ## 1.0.0 - 2016-02-20
 ### Changed
-- Smarter calculation of gradient stop positions for smaller CSS output
+- Smarter calculation of gradient stop positions for smaller CSS output (#1, #2)
 
 ## 0.1.0 - 2016-02-17
 ### Added

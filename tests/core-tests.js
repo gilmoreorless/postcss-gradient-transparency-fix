@@ -354,4 +354,35 @@ describe('postcss-gradient-transparency-fix', function () {
             done);
     });
 
+    it('preserves comments and whitespace', function (done) {
+        function makeValue(trans1, trans2) {
+            return `
+                /* before value */
+                linear-gradient(
+                    /* before angle */
+                    to right /* after angle */,
+                    /* before stops */ red,
+                    /* inside stops, before transparent */
+                    ${trans1},
+                    /* inside stops, after transparent */
+                    blue
+                ),
+                /* between gradients */
+                radial-gradient(/* before stops */
+                    lime
+                    , ${trans2},
+                    magenta
+                    /* after stops */
+                )
+                /* after value */
+            `;
+        }
+
+        testProperty('background-image',
+            makeValue('transparent', 'transparent'),
+            makeValue('rgba(255, 0, 0, 0) 50%, rgba(0, 0, 255, 0) 50%',
+                      'rgba(0, 255, 0, 0) 50%, rgba(255, 0, 255, 0) 50%'),
+            done);
+    });
+
 });
