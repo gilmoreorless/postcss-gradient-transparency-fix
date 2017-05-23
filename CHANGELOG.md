@@ -2,7 +2,7 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
-## [Unreleased]
+## 1.0.4 - 2017-05-23
 ### Fixed
 - CSS comments in gradient values are no longer stripped out (#18)
 
