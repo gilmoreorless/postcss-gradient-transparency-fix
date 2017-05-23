@@ -276,8 +276,8 @@ describe('postcss-gradient-transparency-fix', function () {
 
     it('ignores non-gradient multiple background values', function (done) {
         testProperty('background',
-            'linear-gradient(transparent, blue), transparent, url(http://example.com/transparent.png)',
-            'linear-gradient(rgba(0, 0, 255, 0), blue), transparent, url(http://example.com/transparent.png)',
+            'linear-gradient(transparent, blue), transparent url(http://example.com/transparent.png)',
+            'linear-gradient(rgba(0, 0, 255, 0), blue), transparent url(http://example.com/transparent.png)',
             done);
     });
 

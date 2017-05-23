@@ -25,9 +25,9 @@ function GradientReporter(runner) {
         }
         inputBg = escape(inputBg);
         outputBg = escape(outputBg);
-        var warnings = (test.data.warnings || []).forEach(function (warning) {
-            htmlBits.push(`<p class="warning">Warning: <code>${escape(warning)}</code></p>`);
-        });
+        var warnings = (test.data.warnings || []).map(function (warning) {
+            return `<p class="warning">Warning: <code>${escape(warning)}</code></p>`;
+        }).join('');
 
         htmlBits.push(`
             <div class="test test-${escape(test.state)}">
