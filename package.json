@@ -22,7 +22,7 @@
     "postcss-value-parser": "^3.3.0"
   },
   "devDependencies": {
-    "chai": "^3.5.0",
+    "chai": "^4.1.0",
     "eslint": "^3.1.0",
     "eslint-config-postcss": "^2.0.2",
     "mocha": "^3.0.1"
