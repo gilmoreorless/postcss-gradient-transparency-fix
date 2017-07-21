@@ -2,6 +2,11 @@
 All notable changes to this project will be documented in this file (the format is based on [Keep a Changelog](http://keepachangelog.com/)).
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## [Unreleased]
+### Changed
+- Updated `color` dependency to 2.0.0
+- Updated `chai` and `eslint` dev dependencies
+
 ## 2.0.0 – 2017-05-23
 ### :warning: Breaking change
 - Updated `postcss` dependency to 6.0.1 – this means Node.js 0.12 is no longer supported.
@@ -12,7 +17,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ## 1.0.3 – 2016-12-07
 ### Changed
-- Updated `color` dependency
+- Updated `color` dependency to 1.0.2
 - Updated `eslint` and `mocha` dev dependencies
 - Dropped active testing for Node.js 0.12 (the plugin still works though)
 
