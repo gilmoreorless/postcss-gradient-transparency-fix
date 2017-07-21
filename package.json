@@ -17,13 +17,13 @@
   },
   "homepage": "https://github.com/gilmoreorless/postcss-gradient-transparency-fix",
   "dependencies": {
-    "color": "^1.0.2",
+    "color": "^2.0.0",
     "postcss": "^6.0.1",
     "postcss-value-parser": "^3.3.0"
   },
   "devDependencies": {
     "chai": "^4.1.0",
-    "eslint": "^3.1.0",
+    "eslint": "^4.2.0",
     "eslint-config-postcss": "^2.0.2",
     "mocha": "^3.0.1"
   },
