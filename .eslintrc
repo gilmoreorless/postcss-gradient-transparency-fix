@@ -3,6 +3,10 @@
         "eslint-config-postcss/es5",
         "eslint:recommended"
     ],
+    "env": {
+        "node": true,
+        "mocha": true
+    },
     "rules": {
         "max-len": [1, 180],
         "no-extra-parens": 0,
