@@ -102,15 +102,20 @@ describe('postcss-gradient-transparency-fix', function () {
                            '#fed, rgba(255, 238, 221, 0)', done);
     });
 
+    it('corrects 4-digit hex value', function (done) {
+        testLinearGradient('#abba, transparent',
+                           '#abba, rgba(170, 187, 187, 0)', done);
+    });
+
     it('corrects 6-digit hex value', function (done) {
         testLinearGradient('#5adCab,transparent',
                            '#5adCab,rgba(90, 220, 171, 0)', done);
     });
 
-    // it('corrects 8-digit hex value', function (done) {
-    //     testLinearGradient('#fee1600d, transparent',
-    //                        '#fee1600d, rgba(254, 225, 96, 0)', done);
-    // });
+    it('corrects 8-digit hex value', function (done) {
+        testLinearGradient('#fee1600d, transparent',
+                           '#fee1600d, rgba(254, 225, 96, 0)', done);
+    });
 
     it('corrects named colours', function (done) {
         testLinearGradient('papayawhip, transparent',

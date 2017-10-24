@@ -3,6 +3,9 @@ All notable changes to this project will be documented in this file (the format 
 This project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
+### Added
+- Added support for 4- and 8-digit hex colour values via the `color-string` dependency
+
 ### Changed
 - Updated `color` dependency to 2.0.0
 - Updated `chai`, `eslint` and `mocha` dev dependencies
