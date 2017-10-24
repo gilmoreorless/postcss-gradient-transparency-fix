@@ -2,7 +2,7 @@
 All notable changes to this project will be documented in this file (the format is based on [Keep a Changelog](http://keepachangelog.com/)).
 This project adheres to [Semantic Versioning](http://semver.org/).
 
-## [Unreleased]
+## 2.1.0 - 2017-10-24
 ### Added
 - Added support for 4- and 8-digit hex colour values via the `color-string` dependency
 
