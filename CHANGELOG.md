@@ -2,11 +2,13 @@
 All notable changes to this project will be documented in this file (the format is based on [Keep a Changelog](http://keepachangelog.com/)).
 This project adheres to [Semantic Versioning](http://semver.org/).
 
-## Unreleased
+## 3.0.0
+### :warning: Breaking change
+- Updated `postcss` dependency to 7.0.0 - this means Node.js 4.x is no longer supported
+
 ### Changed
 - Updated `color` dependency to 3.0.0
-- Updated `mocha` dev dependency
-- Dropped active testing for Node.js 4.x, but the plugin should still work
+- Updated `eslint` and `mocha` dev dependencies
 
 ## 2.1.0 - 2017-10-24
 ### Added
