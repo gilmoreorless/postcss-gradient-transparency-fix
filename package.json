@@ -20,7 +20,7 @@
     "color": "^3.0.0",
     "color-string": "^1.5.0",
     "postcss": "^7.0.0",
-    "postcss-value-parser": "^3.3.0"
+    "postcss-value-parser": "^4.0.0"
   },
   "devDependencies": {
     "chai": "^4.1.0",
