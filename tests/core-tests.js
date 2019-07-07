@@ -26,7 +26,8 @@ function test(input, output, warnings, done) {
     }
     curData.input = input;
     curData.expected = output;
-    postcss([ plugin() ]).process(input)
+    postcss([ plugin() ])
+        .process(input, { from: undefined })
         .then(function (result) {
             curData.actual = result.css;
             curData.warnings = result.warnings();
