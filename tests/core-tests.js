@@ -1,3 +1,5 @@
+/* eslint-disable indent */
+
 var postcss = require('postcss');
 var expect  = require('chai').expect;
 var plugin = require('../');
@@ -231,7 +233,7 @@ describe('postcss-gradient-transparency-fix', function () {
     });
 
     it('generates a warning about invalid colours', function (done) {
-        var input = 'transparent, thisdoesntexist'
+        var input = 'transparent, thisdoesntexist';
         testLinearGradient(input, input, [plugin.ERROR_INVALID_COLOR], done);
     });
 
