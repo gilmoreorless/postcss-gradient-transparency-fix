@@ -3,6 +3,9 @@
         "eslint-config-postcss/es5",
         "eslint:recommended"
     ],
+    "parserOptions": {
+        "ecmaVersion": 2015
+    },
     "env": {
         "node": true,
         "mocha": true
