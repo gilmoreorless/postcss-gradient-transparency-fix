@@ -101,7 +101,7 @@ Output:
 
 ## Usage
 
-Install the plugin via [npm](npm): `npm install postcss-gradient-transparency-fix`
+Install the plugin via [npm][badge-npm]: `npm install postcss-gradient-transparency-fix`
 
 Then include it in your project in the same way as other PostCSS plugins. For example:
 
@@ -120,7 +120,7 @@ Only values of the keyword `transparent` will be altered. Any other transparent 
 
 ### Define stop positions
 
-For best results, **define explicit stop positions** for the `transparent` colour stops. The plugin will try to guess missing stop positions where possible, but due to the nature of gradient calculations, some position values can _only_ be calculated by the browser at the time of rendering. [Do you really understand CSS linear-gradients](linear-brosset) gives many details of how browsers calculate stop positions.
+For best results, **define explicit stop positions** for the `transparent` colour stops. The plugin will try to guess missing stop positions where possible, but due to the nature of gradient calculations, some position values can _only_ be calculated by the browser at the time of rendering. [Do you really understand CSS linear-gradients][linear-brosset] gives many details of how browsers calculate stop positions.
 
 Some examples of what is supported:
 
