@@ -6,6 +6,9 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 ### :warning: Breaking change
 - Updated `postcss-value-parser` dependency to `4.0.0` - this means Node.js 6.x is no longer supported.
 
+### Changed
+- Updated some dev dependencies.
+
 ## 3.0.0 - 2018-08-02
 ### :warning: Breaking change
 - Updated `postcss` dependency to `7.0.0` - this means Node.js 4.x is no longer supported.
