@@ -1,13 +1,11 @@
 # Change Log
-All notable changes to this project will be documented in this file (the format is based on [Keep a Changelog](http://keepachangelog.com/)).
+All notable public changes to this project will be documented in this file (the format is based on [Keep a Changelog](http://keepachangelog.com/)).
+Development-only changes (e.g. updates to `devDependencies`) will not be listed here, as they don’t affect the public API.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
 ## Unreleased
 ### :warning: Breaking change
 - Updated `postcss-value-parser` dependency to `4.0.0` - this means Node.js 6.x is no longer supported.
-
-### Changed
-- Updated some dev dependencies.
 
 ## 3.0.0 - 2018-08-02
 ### :warning: Breaking change
@@ -15,7 +13,6 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Changed
 - Updated `color` dependency to `3.0.0`.
-- Updated `eslint` and `mocha` dev dependencies.
 
 ## 2.1.0 - 2017-10-24
 ### Added
@@ -23,7 +20,6 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Changed
 - Updated `color` dependency to `2.0.0`.
-- Updated `chai`, `eslint` and `mocha` dev dependencies.
 
 ## 2.0.0 – 2017-05-23
 ### :warning: Breaking change
@@ -36,7 +32,6 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 ## 1.0.3 – 2016-12-07
 ### Changed
 - Updated `color` dependency to `1.0.2`
-- Updated `eslint` and `mocha` dev dependencies.
 - Dropped active testing for Node.js 0.12 (the plugin still works though).
 
 ### Fixed
