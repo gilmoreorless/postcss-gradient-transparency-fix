@@ -2,7 +2,6 @@
 
 [![npm][badge-npm-img]][badge-npm]
 [![Build Status][badge-ci-img]][badge-ci]
-[![Greenkeeper badge][badge-gk-img]][badge-gk]
 
 A [PostCSS] plugin to fix gradient transparency for certain browsers (looking at you, Safari).
 
@@ -153,8 +152,6 @@ Examples of positions that cannot be calculated at all:
 [badge-npm-img]: https://img.shields.io/npm/v/postcss-gradient-transparency-fix.svg
 [badge-ci]:      https://travis-ci.org/gilmoreorless/postcss-gradient-transparency-fix
 [badge-ci-img]:  https://travis-ci.org/gilmoreorless/postcss-gradient-transparency-fix.svg
-[badge-gk]:      https://greenkeeper.io/
-[badge-gk-img]:  https://badges.greenkeeper.io/gilmoreorless/postcss-gradient-transparency-fix.svg
 
 [PostCSS]: https://github.com/postcss/postcss
 [img-non-premul]: https://rawgit.com/gilmoreorless/postcss-gradient-transparency-fix/master/img/example-non-premul.svg

@@ -33,10 +33,5 @@
     "test": "mocha tests/core-tests.js && npm run lint",
     "test/watch": "mocha --watch tests/core-tests.js --reporter dot",
     "test/visual": "mocha tests/core-tests.js --reporter tests/reporter-gradients"
-  },
-  "greenkeeper": {
-    "ignore": [
-      "eslint-config-postcss"
-    ]
   }
 }
