@@ -3,9 +3,12 @@ All notable public changes to this project will be documented in this file (the 
 Development-only changes (e.g. updates to `devDependencies`) will not be listed here, as they don’t affect the public API.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
-## Unreleased
+## 4.0.0 - 2020-05-29
 ### :warning: Breaking change
-- Updated `postcss-value-parser` dependency to `4.0.0` - this means Node.js 6.x is no longer supported.
+- Dropped support for Node.js 6.x and 8.x.
+
+### Changed
+- Updated `postcss-value-parser` dependency to `4.0.0`.
 
 ## 3.0.0 - 2018-08-02
 ### :warning: Breaking change
