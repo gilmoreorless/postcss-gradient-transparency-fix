@@ -150,8 +150,8 @@ Examples of positions that cannot be calculated at all:
 
 [badge-npm]:     https://www.npmjs.com/package/postcss-gradient-transparency-fix
 [badge-npm-img]: https://img.shields.io/npm/v/postcss-gradient-transparency-fix.svg
-[badge-ci]:      https://travis-ci.org/gilmoreorless/postcss-gradient-transparency-fix
-[badge-ci-img]:  https://travis-ci.org/gilmoreorless/postcss-gradient-transparency-fix.svg
+[badge-ci]:      https://github.com/gilmoreorless/postcss-gradient-transparency-fix/actions?query=workflow%3A%22Tests%22
+[badge-ci-img]:  https://github.com/gilmoreorless/postcss-gradient-transparency-fix/workflows/Tests/badge.svg
 
 [PostCSS]: https://github.com/postcss/postcss
 [img-non-premul]: https://rawgit.com/gilmoreorless/postcss-gradient-transparency-fix/main/img/example-non-premul.svg
