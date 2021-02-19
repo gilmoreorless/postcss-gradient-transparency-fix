@@ -154,8 +154,8 @@ Examples of positions that cannot be calculated at all:
 [badge-ci-img]:  https://travis-ci.org/gilmoreorless/postcss-gradient-transparency-fix.svg
 
 [PostCSS]: https://github.com/postcss/postcss
-[img-non-premul]: https://rawgit.com/gilmoreorless/postcss-gradient-transparency-fix/master/img/example-non-premul.svg
-[img-premul]:     https://rawgit.com/gilmoreorless/postcss-gradient-transparency-fix/master/img/example-premul.svg
+[img-non-premul]: https://rawgit.com/gilmoreorless/postcss-gradient-transparency-fix/main/img/example-non-premul.svg
+[img-premul]:     https://rawgit.com/gilmoreorless/postcss-gradient-transparency-fix/main/img/example-premul.svg
 [CSS gradients]:  https://www.w3.org/TR/css3-images/
 [premul]:         https://www.w3.org/TR/2012/CR-css3-images-20120417/#color-stop-syntax
 [linear-brosset]: https://medium.com/@patrickbrosset/do-you-really-understand-css-linear-gradients-631d9a895caf
