@@ -1,0 +1,15 @@
+version: 2
+updates:
+- package-ecosystem: npm
+  directory: "/"
+  schedule:
+    interval: daily
+    time: "19:00"
+  open-pull-requests-limit: 10
+  ignore:
+  - dependency-name: eslint-config-postcss
+    versions:
+    - "> 2.0.2"
+  - dependency-name: postcss
+    versions:
+    - ">= 8.a, < 9"
