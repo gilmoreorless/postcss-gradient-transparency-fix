@@ -2,8 +2,11 @@
 
 [![npm][badge-npm-img]][badge-npm]
 [![Build Status][badge-ci-img]][badge-ci]
+![Project Status][badge-project-img]
 
-A [PostCSS] plugin to fix gradient transparency for certain browsers (looking at you, Safari).
+A [PostCSS] plugin to fix gradient transparency for older versions of the Safari browser (anything earlier than version 15.4).
+
+:warning: Since the release of Safari 15.4, this plugin is in a maintenance-only mode.
 
 ## What it does
 
@@ -24,15 +27,13 @@ While this was correct from a technical view, it was unintuitive behaviour to we
 
 ![Gradient using new spec][img-premul]
 
-Of course, there’s a catch — not all the browsers have implemented the updated version of the spec. If you write a gradient with a `transparent` value, it will look the way you intended in some browsers but not in others.
+Of course, there was a catch — not all the browsers implemented the updated version of the spec at the same time. If you wrote a gradient with a `transparent` value, it would look the way you intended in some browsers but not in others.
 
-At the current time (February 2016), the following browsers support CSS gradients but do **not** support the updated spec:
+When this plugin was first written in 2016, some browsers had started to support the new spec. Very soon afterwards, Safari was left as the only browser that supported CSS gradients but did **not** support the updated spec. This applied to both desktop and iOS Safari.
 
-* Desktop Safari
-* iOS Safari
-* ...yup, that’s it (I honestly expected this list to be bigger)
+In March 2022, Safari 15.4 was released with [full support for pre-multiplied alpha transparency](safari-15-4), completing the last piece of the support puzzle. But not all devices can upgrade to 15.4, so a compatibility solution is still required.
 
-The solution for those browsers is to not use the `transparent` keyword at all, but instead use specific `rgba()` or `hsla()` values that have full transparency but keep the colour the same:
+The solution for those older browser versions is to not use the `transparent` keyword at all, but instead use specific `rgba()` or `hsla()` values that have full transparency but keep the colour the same:
 
 ```css
 /* Original */
@@ -115,7 +116,7 @@ See the [PostCSS] docs for examples for your environment.
 
 ### `transparent` only
 
-Only values of the keyword `transparent` will be altered. Any other transparent colours, including `rgba(0, 0, 0, 0)`, will be left unchanged as they could be specifically intended as those values. Browsers that do not support premultiplied alpha (see the list above) will still show different results.
+Only values of the keyword `transparent` will be altered. Any other transparent colours, including `rgba(0, 0, 0, 0)`, will be left unchanged as they could be specifically intended as those values.
 
 ### Define stop positions
 
@@ -152,6 +153,7 @@ Examples of positions that cannot be calculated at all:
 [badge-npm-img]: https://img.shields.io/npm/v/postcss-gradient-transparency-fix.svg
 [badge-ci]:      https://github.com/gilmoreorless/postcss-gradient-transparency-fix/actions?query=workflow%3A%22Tests%22
 [badge-ci-img]:  https://github.com/gilmoreorless/postcss-gradient-transparency-fix/workflows/Tests/badge.svg
+[badge-project-img]: https://img.shields.io/badge/project%20status-bug%20fixes%20only-orange.svg
 
 [PostCSS]: https://github.com/postcss/postcss
 [img-non-premul]: https://rawgit.com/gilmoreorless/postcss-gradient-transparency-fix/main/img/example-non-premul.svg
@@ -159,3 +161,4 @@ Examples of positions that cannot be calculated at all:
 [CSS gradients]:  https://www.w3.org/TR/css3-images/
 [premul]:         https://www.w3.org/TR/2012/CR-css3-images-20120417/#color-stop-syntax
 [linear-brosset]: https://medium.com/@patrickbrosset/do-you-really-understand-css-linear-gradients-631d9a895caf
+[safari-15-4]:    https://webkit.org/blog/12445/new-webkit-features-in-safari-15-4/#solving-pain-points
