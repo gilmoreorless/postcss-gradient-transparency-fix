@@ -75,7 +75,7 @@ describe('postcss-gradient-transparency-fix', function () {
                            'red, blue', done);
     });
 
-    it('doesn\'t change rgba(r,g,b,0) values', function (done) {
+    it(`doesn't change rgba(r,g,b,0) values`, function (done) {
         testLinearGradient('rgb(255,0,0), rgba(0,0,0,0)',
                            'rgb(255,0,0), rgba(0,0,0,0)', done);
     });
@@ -208,27 +208,27 @@ describe('postcss-gradient-transparency-fix', function () {
             done);
     });
 
-    it('doesn\'t need to calculate a missing stop position when transparent is between identical colours', function (done) {
+    it(`doesn't need to calculate a missing stop position when transparent is between identical colours`, function (done) {
         testLinearGradient('#00f, transparent, #00f',
                            '#00f, rgba(0, 0, 255, 0), #00f', done);
     });
 
-    it('doesn\'t warn about a missing stop position when transparent is between identical colours', function (done) {
+    it(`doesn't warn about a missing stop position when transparent is between identical colours`, function (done) {
         testLinearGradient('#00f calc(10% + 10px), transparent, #00f',
                            '#00f calc(10% + 10px), rgba(0, 0, 255, 0), #00f', done);
     });
 
-    it('generates a warning when missing stop points can\'t be calculated (missing non-% unit)', function (done) {
+    it(`generates a warning when missing stop points can't be calculated (missing non-% unit)`, function (done) {
         var input = '#f00 20px, transparent, #0f0';
         testLinearGradient(input, input, [plugin.ERROR_STOP_POSITION], done);
     });
 
-    it('generates a warning when missing stop points can\'t be calculated (mixed units)', function (done) {
+    it(`generates a warning when missing stop points can't be calculated (mixed units)`, function (done) {
         var input = '#f00 10%, transparent, #0f0 20em';
         testLinearGradient(input, input, [plugin.ERROR_STOP_POSITION], done);
     });
 
-    it('generates a warning when missing stop points can\'t be calculated (calc units)', function (done) {
+    it(`generates a warning when missing stop points can't be calculated (calc units)`, function (done) {
         var input = '#f00 calc(10% + 1em), transparent, #0f0 calc(90% - 1em)';
         testLinearGradient(input, input, [plugin.ERROR_STOP_POSITION], done);
     });
