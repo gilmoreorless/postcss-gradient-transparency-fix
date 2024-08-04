@@ -7,7 +7,6 @@ var plugin = require('../');
 var curData;
 
 function testOutput(result, output, warnings, done) {
-    expect(result.css).to.eql(output);
     if (warnings) {
         expect(result.warnings().length).to.equal(warnings.length);
         result.warnings().forEach(function (warning, i) {
@@ -16,6 +15,7 @@ function testOutput(result, output, warnings, done) {
     } else {
         expect(result.warnings()).to.be.empty;
     }
+    expect(result.css).to.eql(output);
     done();
 }
 
@@ -235,7 +235,7 @@ describe('postcss-gradient-transparency-fix', function () {
 
     it('generates a warning about invalid colours', function (done) {
         var input = 'transparent, thisdoesntexist';
-        testLinearGradient(input, input, [plugin.ERROR_INVALID_COLOR], done);
+        testLinearGradient(input, input, [plugin.ERROR_INVALID_COLOR.replace('%s', 'thisdoesntexist')], done);
     });
 
     it('handles multiple transparent values in a single gradient', function (done) {

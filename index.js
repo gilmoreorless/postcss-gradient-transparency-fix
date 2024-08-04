@@ -8,7 +8,7 @@ var rTransparent = /\btransparent\b/;
 var rHsl = /^hsla?$/;
 
 var errorStopPosition = 'Cannot calculate a stop position for `transparent` value. Please use explicit stop positions.';
-var errorInvalidColor = 'Cannot calculate transparency for an invalid color. Please check your color stop definitions.';
+var errorInvalidColor = 'Cannot calculate transparency for an invalid color (`%s`). Please check your color stop definitions.';
 
 // ----- UTILITY FUNCTIONS -----
 
@@ -158,7 +158,7 @@ ColorStop.prototype.getTransparentColor = function (opts) {
     var parsed = getColor(node);
     // Node is not a parsable colour, so don't change anything
     if (!parsed) {
-        this.warning = errorInvalidColor;
+        this.warning = errorInvalidColor.replace('%s', valueParser.stringify(node));
         return 'transparent';
     }
     // Try to match the input format as much as possible
