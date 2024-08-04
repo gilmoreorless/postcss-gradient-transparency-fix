@@ -210,8 +210,9 @@ function Gradient(parsedNode) {
 Gradient.prototype.setNode = function (node) {
     this.node = node;
     var stopList = this.stops = [];
+    var curStop;
     if (node.nodes) {
-        var curStop = new ColorStop();
+        curStop = new ColorStop();
         curStop.parent = this;
         var isPrelude = false;
         var isFirst = true;
@@ -267,6 +268,24 @@ Gradient.prototype.setNode = function (node) {
             stopList.push(curStop);
         }
         movePendingNodesTo(this.afterNodes);
+    }
+
+    /**
+     * Account for interpolation hints, which have the syntax of stops with no colour value, only a percentage.
+     * These get parsed above as stops with an invalid colour value (e.g. '90%').
+     * They need to be merged in to the following stop as beforeNodes, the same as comments.
+     */
+    var i = 0;
+    while (i < stopList.length) {
+        curStop = stopList[i];
+        if (curStop.colorNode.value.endsWith('%') && !curStop.positionNode) {
+            var nextStop = stopList[i + 1];
+            if (nextStop) {
+                nextStop.beforeNodes = curStop.beforeNodes.concat(curStop.colorNode, nextStop.beforeNodes);
+                stopList.splice(i, 1); // Remove curStop from the list
+            }
+        }
+        i++;
     }
 };
 

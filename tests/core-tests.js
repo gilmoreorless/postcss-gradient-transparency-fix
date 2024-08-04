@@ -223,6 +223,13 @@ describe('postcss-gradient-transparency-fix', function () {
             done);
     });
 
+    it('calculates missing stop positions when possible (ignoring interpolation hints)', function (done) {
+        testLinearGradient(
+            '#f00, 10%, transparent, 60%, #0f0 70%',
+            '#f00, 10%, rgba(255, 0, 0, 0) 35%, rgba(0, 255, 0, 0) 35%, 60%, #0f0 70%',
+            done);
+    });
+
     it(`doesn't need to calculate a missing stop position when transparent is between identical colours`, function (done) {
         testLinearGradient('#00f, transparent, #00f',
                            '#00f, rgba(0, 0, 255, 0), #00f', done);
@@ -382,6 +389,8 @@ describe('postcss-gradient-transparency-fix', function () {
                 linear-gradient(
                     /* before angle */
                     to right /* after angle */,
+                    /* before hint */
+                    30% /* after hint */,
                     /* before stops */ red,
                     /* inside stops, before transparent */
                     ${trans1},
