@@ -226,7 +226,7 @@ Gradient.prototype.setNode = function (node) {
                 append(pendingNodes, subNode);
                 return;
             }
-            // Dividers (commas) define the end of a stop
+            // Dividers (commas or slashes) define the end of a stop
             if (subNode.type === 'div') {
                 if (isPrelude) {
                     movePendingNodesTo(this.preludeNodes);

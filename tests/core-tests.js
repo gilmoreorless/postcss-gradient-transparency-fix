@@ -80,9 +80,24 @@ describe('postcss-gradient-transparency-fix', function () {
                            'rgb(255,0,0), rgba(0,0,0,0)', done);
     });
 
+    it(`doesn't change rgb(r b g / 0) values`, function (done) {
+        testLinearGradient('rgb(255,0,0), rgb(0 0 0/0)',
+                           'rgb(255,0,0), rgb(0 0 0/0)', done);
+    });
+
     it('corrects single rgb() value', function (done) {
         testLinearGradient('rgb(255,0,0), transparent',
                            'rgb(255,0,0), rgba(255, 0, 0, 0)', done);
+    });
+
+    it('corrects space-separated rgb() value', function (done) {
+        testLinearGradient('rgb(255 0 0), transparent',
+                           'rgb(255 0 0), rgba(255, 0, 0, 0)', done);
+    });
+
+    it('corrects space-separated rgb() value with alpha', function (done) {
+        testLinearGradient('rgb(12 34 56 / 0.4), transparent',
+                           'rgb(12 34 56 / 0.4), rgba(12, 34, 56, 0)', done);
     });
 
     it('corrects single rgba() value', function (done) {
